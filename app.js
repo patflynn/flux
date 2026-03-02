@@ -275,6 +275,25 @@ function render() {
       </div>
     `;
 
+    // Build timer section
+    let timerSection = '';
+    const repSeconds = ExerciseTimer.parseSeconds(ex.reps);
+    const restSeconds = ExerciseTimer.parseSeconds(ex.rest);
+    if (repSeconds || restSeconds) {
+      timerSection = '<div class="timer-section">';
+      if (repSeconds) {
+        timerSection += ExerciseTimer.renderTimerHTML(
+          `timer_ex_${currentState.globalDay}_${index}`, repSeconds, 'EXERCISE'
+        );
+      }
+      if (restSeconds) {
+        timerSection += ExerciseTimer.renderTimerHTML(
+          `timer_rest_${currentState.globalDay}_${index}`, restSeconds, 'REST'
+        );
+      }
+      timerSection += '</div>';
+    }
+
     return `
       <div class="exercise${isCompleted ? ' completed' : ''}" data-index="${index}">
         <div class="exercise-header">
@@ -287,6 +306,7 @@ function render() {
           <span><strong>${ex.rest}</strong> rest</span>
         </div>
         ${ex.note ? `<div class="exercise-note">${ex.note}</div>` : ''}
+        ${timerSection}
         ${weightSection}
         ${feedbackSection}
       </div>
@@ -294,6 +314,7 @@ function render() {
   }).join('');
 
   updateProgressBar();
+  ExerciseTimer.initAll();
 }
 
 // Update session progress bar

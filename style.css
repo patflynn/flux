@@ -648,6 +648,95 @@ main {
 }
 
 /* =============================================
+   EXERCISE TIMER
+   ============================================= */
+.timer-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.timer-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.timer-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.timer-display {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5em;
+  text-align: center;
+}
+
+.timer-display.timer-done {
+  color: var(--accent);
+  text-shadow: var(--glow);
+}
+
+.timer-start-pause,
+.timer-reset {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.timer-start-pause:hover,
+.timer-reset:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.timer-start-pause:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.timer-start-pause:disabled:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+.timer-reset {
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.timer-reset:hover {
+  border-color: var(--text-secondary);
+  background: var(--text-secondary);
+  color: var(--bg-primary);
+}
+
+/* =============================================
    REST DAY
    ============================================= */
 #rest-day {

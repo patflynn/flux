@@ -460,6 +460,162 @@ test.describe('Basement Lab PWA', () => {
     expect(fontFamily).toMatch(/courier|monospace/i);
   });
 
+  // =============================================
+  // Timer Tests
+  // =============================================
+
+  test('timed exercise shows exercise timer widget', async ({ page }) => {
+    // Day 1 Workout A has "Swedish Ladder Dead Hang" with reps "45s"
+    const timerWidgets = page.locator('.timer-widget');
+    const count = await timerWidgets.count();
+    expect(count).toBeGreaterThan(0);
+
+    // Find an exercise timer (labeled EXERCISE)
+    const exerciseTimer = page.locator('.timer-widget .timer-label', { hasText: 'EXERCISE' }).first();
+    await expect(exerciseTimer).toBeVisible();
+  });
+
+  test('rest timer widget appears for exercises with rest period', async ({ page }) => {
+    // Most exercises have rest periods like "90s", "60s"
+    const restTimer = page.locator('.timer-widget .timer-label', { hasText: 'REST' }).first();
+    await expect(restTimer).toBeVisible();
+  });
+
+  test('timer displays correct initial duration', async ({ page }) => {
+    // Swedish Ladder Dead Hang has reps "45s" — should show "45"
+    const deadHangCard = page.locator('.exercise', { hasText: 'Dead Hang' });
+    const exerciseDisplay = deadHangCard.locator('.timer-widget .timer-display').first();
+    await expect(exerciseDisplay).toContainText('45');
+  });
+
+  test('timer start button begins countdown', async ({ page }) => {
+    const deadHangCard = page.locator('.exercise', { hasText: 'Dead Hang' });
+    await deadHangCard.scrollIntoViewIfNeeded();
+    const timerWidget = deadHangCard.locator('.timer-widget').first();
+    const display = timerWidget.locator('.timer-display');
+    const startBtn = timerWidget.locator('.timer-start-pause');
+
+    // Initial state
+    await expect(startBtn).toContainText('START');
+    const initialText = await display.textContent();
+
+    // Click start via JS to avoid mobile pointer interception issues
+    await startBtn.evaluate(el => el.click());
+    await expect(startBtn).toContainText('PAUSE');
+
+    // Wait a bit and verify countdown progressed
+    await page.waitForTimeout(1500);
+    const afterText = await display.textContent();
+    expect(afterText).not.toBe(initialText);
+  });
+
+  test('timer pause button stops countdown', async ({ page }) => {
+    const deadHangCard = page.locator('.exercise', { hasText: 'Dead Hang' });
+    await deadHangCard.scrollIntoViewIfNeeded();
+    const timerWidget = deadHangCard.locator('.timer-widget').first();
+    const display = timerWidget.locator('.timer-display');
+    const startPauseBtn = timerWidget.locator('.timer-start-pause');
+
+    // Start timer
+    await startPauseBtn.evaluate(el => el.click());
+    await page.waitForTimeout(1500);
+
+    // Pause
+    await startPauseBtn.evaluate(el => el.click());
+    await expect(startPauseBtn).toContainText('START');
+
+    // Capture value, wait, verify it didn't change
+    const pausedValue = await display.textContent();
+    await page.waitForTimeout(1500);
+    const afterWaitValue = await display.textContent();
+    expect(afterWaitValue).toBe(pausedValue);
+  });
+
+  test('timer reset button restores initial duration', async ({ page }) => {
+    const deadHangCard = page.locator('.exercise', { hasText: 'Dead Hang' });
+    await deadHangCard.scrollIntoViewIfNeeded();
+    const timerWidget = deadHangCard.locator('.timer-widget').first();
+    const display = timerWidget.locator('.timer-display');
+    const startBtn = timerWidget.locator('.timer-start-pause');
+    const resetBtn = timerWidget.locator('.timer-reset');
+
+    const initialText = await display.textContent();
+
+    // Start and let it count down
+    await startBtn.evaluate(el => el.click());
+    await page.waitForTimeout(1500);
+
+    // Reset
+    await resetBtn.evaluate(el => el.click());
+    await expect(display).toContainText(initialText);
+    await expect(startBtn).toContainText('START');
+  });
+
+  test('timer shows DONE when countdown reaches zero', async ({ page }) => {
+    const deadHangCard = page.locator('.exercise', { hasText: 'Dead Hang' });
+    // Scroll the card into view to avoid footer overlap
+    await deadHangCard.scrollIntoViewIfNeeded();
+
+    // Shorten the first timer to 2s for fast testing
+    await page.evaluate(() => {
+      const widget = document.querySelector('.exercise:nth-child(3) .timer-widget');
+      if (widget) {
+        widget.dataset.timerDuration = '2';
+      }
+    });
+    await page.evaluate(() => ExerciseTimer.initAll());
+
+    const timerWidget = deadHangCard.locator('.timer-widget').first();
+    const display = timerWidget.locator('.timer-display');
+    const startBtn = timerWidget.locator('.timer-start-pause');
+
+    await expect(display).toContainText('2');
+    await startBtn.evaluate(el => el.click());
+
+    // Wait for the timer to reach 0
+    await expect(startBtn).toContainText('DONE', { timeout: 5000 });
+    await expect(display).toContainText('0');
+  });
+
+  test('timer reset works after countdown completes', async ({ page }) => {
+    const deadHangCard = page.locator('.exercise', { hasText: 'Dead Hang' });
+    await deadHangCard.scrollIntoViewIfNeeded();
+
+    // Shorten the first timer to 1s for fast testing
+    await page.evaluate(() => {
+      const widget = document.querySelector('.exercise:nth-child(3) .timer-widget');
+      if (widget) {
+        widget.dataset.timerDuration = '1';
+      }
+    });
+    await page.evaluate(() => ExerciseTimer.initAll());
+
+    const timerWidget = deadHangCard.locator('.timer-widget').first();
+    const startBtn = timerWidget.locator('.timer-start-pause');
+    const resetBtn = timerWidget.locator('.timer-reset');
+    const display = timerWidget.locator('.timer-display');
+
+    // Run to completion
+    await startBtn.evaluate(el => el.click());
+    await expect(startBtn).toContainText('DONE', { timeout: 5000 });
+
+    // Reset
+    await resetBtn.evaluate(el => el.click());
+    await expect(startBtn).toContainText('START');
+    await expect(display).toContainText('1');
+  });
+
+  test('exercise without timed reps does not show exercise timer', async ({ page }) => {
+    // "KB Gorilla Rows" has reps "12/side" — should NOT have an EXERCISE timer
+    const gorillaCard = page.locator('.exercise', { hasText: 'Gorilla Rows' });
+    const exerciseTimerLabel = gorillaCard.locator('.timer-label', { hasText: 'EXERCISE' });
+    await expect(exerciseTimerLabel).toHaveCount(0);
+
+    // But should still have a REST timer (rest: "90s")
+    const restTimerLabel = gorillaCard.locator('.timer-label', { hasText: 'REST' });
+    await expect(restTimerLabel).toHaveCount(1);
+  });
+
   test('each theme has distinct accent color', async ({ page }) => {
     const getAccentColor = async () => {
       const header = page.locator('header h1');
