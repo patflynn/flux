@@ -92,6 +92,13 @@ function loadState() {
   const saved = localStorage.getItem(STATE_KEY);
   if (saved) {
     currentState = JSON.parse(saved);
+    // Validate globalDay: must be a positive integer
+    const day = Number(currentState.globalDay);
+    if (!Number.isInteger(day) || day < 1) {
+      currentState.globalDay = 1;
+    } else {
+      currentState.globalDay = day;
+    }
   } else {
     currentState = {
       globalDay: 1,

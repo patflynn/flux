@@ -11,11 +11,39 @@ const ExerciseTimer = (() => {
   // Shared AudioContext (created on first user interaction)
   let audioCtx = null;
 
+  /**
+   * Escape a string for safe insertion into HTML.
+   */
+  function escapeHTML(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function getAudioContext() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     return audioCtx;
+  }
+
+  /**
+   * Create and play a single oscillator tone.
+   */
+  function createTone(ctx, freq, startTime, duration) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.15, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration);
   }
 
   /**
@@ -26,30 +54,8 @@ const ExerciseTimer = (() => {
     try {
       const ctx = getAudioContext();
       const now = ctx.currentTime;
-
-      // First tone
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.type = 'square';
-      osc1.frequency.value = 880;
-      gain1.gain.setValueAtTime(0.15, now);
-      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc1.start(now);
-      osc1.stop(now + 0.15);
-
-      // Second tone
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'square';
-      osc2.frequency.value = 660;
-      gain2.gain.setValueAtTime(0.15, now + 0.15);
-      gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.start(now + 0.15);
-      osc2.stop(now + 0.35);
+      createTone(ctx, 880, now, 0.15);
+      createTone(ctx, 660, now + 0.15, 0.2);
     } catch (e) {
       // Audio not available — fail silently
     }
@@ -176,8 +182,8 @@ const ExerciseTimer = (() => {
    */
   function renderTimerHTML(id, seconds, label) {
     return `
-      <div class="timer-widget" data-timer-id="${id}" data-timer-duration="${seconds}">
-        <span class="timer-label">${label}</span>
+      <div class="timer-widget" data-timer-id="${escapeHTML(id)}" data-timer-duration="${seconds}">
+        <span class="timer-label">${escapeHTML(label)}</span>
         <span class="timer-display">${formatTime(seconds)}</span>
         <button class="timer-start-pause" type="button">START</button>
         <button class="timer-reset" type="button">RST</button>
@@ -190,11 +196,7 @@ const ExerciseTimer = (() => {
    * Call this after rendering exercise cards.
    */
   function initAll() {
-    // Clean up old timers
-    for (const id in timers) {
-      clearInterval(timers[id].interval);
-      delete timers[id];
-    }
+    destroyAll();
 
     document.querySelectorAll('.timer-widget').forEach(widget => {
       const id = widget.dataset.timerId;

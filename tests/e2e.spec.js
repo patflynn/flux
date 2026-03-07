@@ -503,10 +503,8 @@ test.describe('Basement Lab PWA', () => {
     await startBtn.evaluate(el => el.click());
     await expect(startBtn).toContainText('PAUSE');
 
-    // Wait a bit and verify countdown progressed
-    await page.waitForTimeout(1500);
-    const afterText = await display.textContent();
-    expect(afterText).not.toBe(initialText);
+    // Wait for countdown to progress
+    await expect(display).not.toHaveText(initialText, { timeout: 3000 });
   });
 
   test('timer pause button stops countdown', async ({ page }) => {
@@ -516,9 +514,10 @@ test.describe('Basement Lab PWA', () => {
     const display = timerWidget.locator('.timer-display');
     const startPauseBtn = timerWidget.locator('.timer-start-pause');
 
-    // Start timer
+    // Start timer and wait for countdown to progress
+    const initialText = await display.textContent();
     await startPauseBtn.evaluate(el => el.click());
-    await page.waitForTimeout(1500);
+    await expect(display).not.toHaveText(initialText, { timeout: 3000 });
 
     // Pause
     await startPauseBtn.evaluate(el => el.click());
@@ -526,9 +525,7 @@ test.describe('Basement Lab PWA', () => {
 
     // Capture value, wait, verify it didn't change
     const pausedValue = await display.textContent();
-    await page.waitForTimeout(1500);
-    const afterWaitValue = await display.textContent();
-    expect(afterWaitValue).toBe(pausedValue);
+    await expect(display).toHaveText(pausedValue, { timeout: 2000 });
   });
 
   test('timer reset button restores initial duration', async ({ page }) => {
@@ -543,7 +540,7 @@ test.describe('Basement Lab PWA', () => {
 
     // Start and let it count down
     await startBtn.evaluate(el => el.click());
-    await page.waitForTimeout(1500);
+    await expect(display).not.toHaveText(initialText, { timeout: 3000 });
 
     // Reset
     await resetBtn.evaluate(el => el.click());
