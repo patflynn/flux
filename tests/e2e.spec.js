@@ -613,6 +613,26 @@ test.describe('Basement Lab PWA', () => {
     await expect(restTimerLabel).toHaveCount(1);
   });
 
+  test('timer widgets do not overflow their container on small viewports', async ({ page }) => {
+    const timerSection = page.locator('.timer-section').first();
+    await timerSection.scrollIntoViewIfNeeded();
+
+    // Each timer widget should fit within the exercise card (no horizontal overflow)
+    const widgets = timerSection.locator('.timer-widget');
+    const count = await widgets.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i++) {
+      const widget = widgets.nth(i);
+      const box = await widget.boundingBox();
+      const sectionBox = await timerSection.boundingBox();
+      // Widget should not extend beyond the timer section's right edge
+      expect(box.x + box.width).toBeLessThanOrEqual(sectionBox.x + sectionBox.width + 1);
+      // Widget should have reasonable width (at least 200px on a 375px screen)
+      expect(box.width).toBeGreaterThan(200);
+    }
+  });
+
   test('each theme has distinct accent color', async ({ page }) => {
     const getAccentColor = async () => {
       const header = page.locator('header h1');

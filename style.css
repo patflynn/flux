@@ -667,7 +667,7 @@ main {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.4rem 0.6rem;
-  flex: 1;
+  flex: 1 1 14rem;
   min-width: 0;
 }
 
