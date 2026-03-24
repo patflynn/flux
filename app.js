@@ -361,7 +361,7 @@ function getLastWeight(exerciseName) {
   let lastDay = 0;
 
   for (const key in log) {
-    if (log[key].exercise === exerciseName && log[key].day > lastDay) {
+    if (log[key].exercise === exerciseName && log[key].day > lastDay && typeof log[key].weight === 'number' && !isNaN(log[key].weight)) {
       lastWeight = log[key].weight;
       lastDay = log[key].day;
     }
@@ -375,10 +375,10 @@ function getSuggestedWeight(exerciseName, startingWeight, increment = 5) {
   const log = loadLog();
   const currentWeek = Math.floor((currentState.globalDay - 1) / 7) + 1;
 
-  // Find last logged weight for this exercise
+  // Find last logged weight for this exercise (must have a valid weight)
   let lastEntry = null;
   for (const key in log) {
-    if (log[key].exercise === exerciseName) {
+    if (log[key].exercise === exerciseName && typeof log[key].weight === 'number' && !isNaN(log[key].weight)) {
       if (!lastEntry || log[key].timestamp > lastEntry.timestamp) {
         lastEntry = log[key];
       }
@@ -386,7 +386,7 @@ function getSuggestedWeight(exerciseName, startingWeight, increment = 5) {
   }
 
   if (!lastEntry) {
-    return startingWeight; // First time - use starting weight
+    return startingWeight; // First time or no valid weight - use starting weight
   }
 
   const lastWeek = Math.floor((lastEntry.day - 1) / 7) + 1;
@@ -595,12 +595,13 @@ function saveWeightInput(input) {
   const key = input.dataset.key;
   const weight = input.value;
 
-  if (weight) {
+  const parsedWeight = parseFloat(weight);
+  if (weight && !isNaN(parsedWeight)) {
     // Preserve existing fields when updating weight
     log[key] = {
       ...log[key],
       exercise: input.dataset.exercise,
-      weight: parseFloat(weight),
+      weight: parsedWeight,
       day: currentState.globalDay,
       timestamp: Date.now()
     };

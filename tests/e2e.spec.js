@@ -633,6 +633,32 @@ test.describe('Basement Lab PWA', () => {
     }
   });
 
+  test('suggested weight does not show NaN after saving difficulty without weight', async ({ page }) => {
+    // Simulate a log entry with difficulty but no weight (the bug trigger)
+    await page.evaluate(() => {
+      const log = { '1_3': { exercise: 'KB Deadlift', difficulty: 'hard', day: 1, timestamp: Date.now() } };
+      localStorage.setItem('basement_lab_log', JSON.stringify(log));
+    });
+    await page.reload();
+
+    // Check that no suggested hint or weight field shows NaN
+    const suggestedHints = page.locator('.suggested-hint');
+    const count = await suggestedHints.count();
+    for (let i = 0; i < count; i++) {
+      const text = await suggestedHints.nth(i).textContent();
+      expect(text).not.toContain('NaN');
+    }
+
+    const weightFields = page.locator('.weight-field');
+    const fieldCount = await weightFields.count();
+    for (let i = 0; i < fieldCount; i++) {
+      const value = await weightFields.nth(i).getAttribute('value');
+      const placeholder = await weightFields.nth(i).getAttribute('placeholder');
+      expect(value || '').not.toContain('NaN');
+      expect(placeholder || '').not.toContain('NaN');
+    }
+  });
+
   test('each theme has distinct accent color', async ({ page }) => {
     const getAccentColor = async () => {
       const header = page.locator('header h1');
