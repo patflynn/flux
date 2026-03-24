@@ -1,0 +1,16 @@
+{
+  "id": "20260323-2108-4b69",
+  "prompt": "Fix the NaN weight bug. The app is displaying 'nan' for weight values in the UI (see the screenshot in the issue). Investigate the weight data flow — how weights are stored, retrieved, and displayed. Find where the NaN is introduced (likely a missing/undefined value being parsed as a number) and fix it with proper defaults or validation. Make sure to test your fix. The app is at https://patflynn.github.io/build/",
+  "issue": "45",
+  "branch": "agent/20260323-2108-4b69",
+  "worktree": "/tmp/klaus-sessions/build/20260323-2108-4b69",
+  "tmux_pane": "%9",
+  "budget": "5.00",
+  "log_file": "/home/patrick/.klaus/sessions/session-20260323-2107-e4db/logs/20260323-2108-4b69.jsonl",
+  "created_at": "2026-03-23T21:09:10-04:00",
+  "cost_usd": 0.67110475,
+  "duration_ms": 184716,
+  "pr_url": "https://github.com/patflynn/build/pull/46",
+  "target_repo": "build",
+  "clone_dir": "/home/patrick/hack/build"
+}
