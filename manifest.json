@@ -1,21 +1,21 @@
 {
-  "name": "Basement Lab",
-  "short_name": "Basement Lab",
+  "name": "Flux",
+  "short_name": "Flux",
   "description": "12 Month Transformation Tracker",
-  "id": "/build/",
-  "start_url": "/build/",
-  "scope": "/build/",
+  "id": "/flux/",
+  "start_url": "/flux/",
+  "scope": "/flux/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "icons": [
     {
-      "src": "/build/data/icon-192.png",
+      "src": "/flux/data/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/build/data/icon-512.png",
+      "src": "/flux/data/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

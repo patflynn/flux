@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test.describe('Basement Lab PWA', () => {
+test.describe('Flux PWA', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
@@ -16,7 +16,7 @@ test.describe('Basement Lab PWA', () => {
   });
 
   test('displays header with day counter', async ({ page }) => {
-    await expect(page.locator('header h1')).toContainText('BASEMENT LAB');
+    await expect(page.locator('header h1')).toContainText('FLUX');
     await expect(page.locator('#day-counter')).toContainText('DAY');
     await expect(page.locator('#current-day')).toContainText('1');
   });

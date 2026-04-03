@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Validation script for Basement Lab
+ * Validation script for Flux
  * - Validates program.json schema
  * - Checks HTML/JS/CSS syntax
  */
@@ -261,7 +261,7 @@ function validateExerciseNaming() {
 }
 
 // Run all validations
-console.log('🏋️ Basement Lab Validation Suite\n');
+console.log('🏋️ Flux Validation Suite\n');
 console.log('='.repeat(40));
 
 validateFileStructure();

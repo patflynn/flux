@@ -1,4 +1,4 @@
-# Claude Code Rules for Basement Lab
+# Claude Code Rules for Flux
 
 ## Git & GitHub
 

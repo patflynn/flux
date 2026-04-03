@@ -1,5 +1,5 @@
 /**
- * Basement Lab - Workout Tracker
+ * Flux - Workout Tracker
  * State management and UI logic
  */
 

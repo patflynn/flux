@@ -1,4 +1,4 @@
-# Basement Lab - Project Plan
+# Flux - Project Plan
 
 **Goal:** Build a static, mobile-first PWA to track a 12-month bodybuilding transformation.
 

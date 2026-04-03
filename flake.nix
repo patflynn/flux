@@ -1,5 +1,5 @@
 {
-  description = "Basement Lab - PWA workout tracker";
+  description = "Flux - PWA workout tracker";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -25,7 +25,7 @@
           ];
 
           shellHook = ''
-            echo "Basement Lab dev shell"
+            echo "Flux dev shell"
             echo "Commands:"
             echo "  serve .             - Start local server"
             echo "  node tests/validate.js  - Run validation"
@@ -44,12 +44,12 @@
             export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
             export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
             npm install --prefer-offline --no-audit --no-fund --quiet
-            echo "Basement Lab test shell (with Playwright)"
+            echo "Flux test shell (with Playwright)"
           '';
         };
 
         packages.default = pkgs.stdenv.mkDerivation {
-          pname = "basement-lab";
+          pname = "flux";
           version = "1.0.0";
           src = ./.;
 

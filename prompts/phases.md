@@ -34,7 +34,7 @@ MANDATORY REQUIREMENTS:
 "Act as a strength coach specializing in sarcopenia prevention and aesthetics for men over 45. Create a 12-week 'Recomposition' program for a male, 47, with mild back history.
 Equipment: Kettlebells, Swedish Ladder, Pull-up Bar, Peloton.
 Goal: Fix posture, build core stability, and establish neuromuscular connection.
-Format: Output valid JSON matching the 'Basement Lab' schema.
+Format: Output valid JSON matching the 'Flux' schema.
 Schedule: 3 days Strength (Full Body), 2 days Conditioning (Peloton/Carries). Focus on tempo and form over heavy weight."
 
 # Phase 2: Hypertrophy & Shape (Months 4-7)

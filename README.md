@@ -1,8 +1,8 @@
-# Basement Lab
+# Flux
 
 A static, mobile-first PWA to track and execute on a fitness goal.
 
-**Live App:** https://patflynn.github.io/build/
+**Live App:** https://patflynn.github.io/flux/
 
 ## Features
 
