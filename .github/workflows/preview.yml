@@ -120,9 +120,8 @@ jobs:
             await github.rest.repos.createDispatchEvent({
               owner: 'gunk-dev',
               repo: 'infra',
-              event_type: 'flux-preview',
+              event_type: 'flux-preview-cleanup',
               client_payload: {
-                pr_number: process.env.PR_NUMBER,
-                action: 'closed'
+                pr_number: process.env.PR_NUMBER
               }
             });
