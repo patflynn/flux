@@ -6,19 +6,22 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-
 jobs:
   nix-lint:
-    uses: gunk-dev/.github/.github/workflows/nix-lint.yml@main
+    permissions:
+      contents: read
+    uses: gunk-dev/.github/.github/workflows/nix-lint.yml@396dfabb2f0076e85f05e7f713f9436b5851ba5d # main
 
   zizmor:
-    uses: gunk-dev/.github/.github/workflows/zizmor.yml@main
+    permissions:
+      contents: read
+    uses: gunk-dev/.github/.github/workflows/zizmor.yml@396dfabb2f0076e85f05e7f713f9436b5851ba5d # main
 
   validate:
     name: Validate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -36,6 +39,8 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:

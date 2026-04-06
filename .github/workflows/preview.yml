@@ -5,17 +5,16 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches: [main]
 
-permissions:
-  contents: read
-  pull-requests: write
-  pages: write
-  id-token: write
-
 jobs:
   deploy-preview:
     name: Deploy Preview
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -35,10 +34,12 @@ jobs:
 
       - name: Comment PR with preview link
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         with:
           script: |
             const { owner, repo } = context.repo;
-            const prNumber = context.payload.pull_request.number;
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
 
             // Check for existing comment
             const comments = await github.rest.issues.listComments({
@@ -78,9 +79,16 @@ jobs:
   trigger-preview:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      HAS_INFRA_TOKEN: ${{ secrets.INFRA_DISPATCH_TOKEN != '' }}
     steps:
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-        if: ${{ secrets.INFRA_DISPATCH_TOKEN != '' }}
+        if: env.HAS_INFRA_TOKEN == 'true'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_ACTION: ${{ github.event.action }}
         with:
           github-token: ${{ secrets.INFRA_DISPATCH_TOKEN }}
           script: |
@@ -89,17 +97,23 @@ jobs:
               repo: 'infra',
               event_type: 'flux-preview',
               client_payload: {
-                pr_number: context.payload.pull_request.number.toString(),
-                action: context.payload.action
+                pr_number: process.env.PR_NUMBER,
+                action: process.env.PR_ACTION
               }
             });
 
   cleanup-preview:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      HAS_INFRA_TOKEN: ${{ secrets.INFRA_DISPATCH_TOKEN != '' }}
     steps:
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-        if: ${{ secrets.INFRA_DISPATCH_TOKEN != '' }}
+        if: env.HAS_INFRA_TOKEN == 'true'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         with:
           github-token: ${{ secrets.INFRA_DISPATCH_TOKEN }}
           script: |
@@ -108,7 +122,7 @@ jobs:
               repo: 'infra',
               event_type: 'flux-preview',
               client_payload: {
-                pr_number: context.payload.pull_request.number.toString(),
+                pr_number: process.env.PR_NUMBER,
                 action: 'closed'
               }
             });
