@@ -10,8 +10,15 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, klaus }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      klaus,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
       in
@@ -21,6 +28,7 @@
             nodejs_20
             nodePackages.serve
             imagemagick
+            nixfmt-rfc-style
             klaus.packages.${system}.default
           ];
 
@@ -59,5 +67,6 @@
             cp -r data $out/
           '';
         };
-      });
+      }
+    );
 }
