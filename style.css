@@ -999,6 +999,45 @@ footer {
 }
 
 /* =============================================
+   DATA IMPORT/EXPORT
+   ============================================= */
+.data-section {
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.data-label {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.data-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.data-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all var(--transition);
+  letter-spacing: 0.05em;
+}
+
+.data-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* =============================================
    UTILITY CLASSES
    ============================================= */
 .hidden {

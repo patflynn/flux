@@ -687,4 +687,90 @@ test.describe('Flux PWA', () => {
     const uniqueColors = [...new Set(colors)];
     expect(uniqueColors.length).toBe(4);
   });
+
+  test('export button is visible in settings modal', async ({ page }) => {
+    await page.click('#settings-btn');
+    const exportBtn = page.locator('#export-btn');
+    await expect(exportBtn).toBeVisible();
+    await expect(exportBtn).toHaveText('EXPORT');
+  });
+
+  test('import button is visible in settings modal', async ({ page }) => {
+    await page.click('#settings-btn');
+    const importBtn = page.locator('#import-btn');
+    await expect(importBtn).toBeVisible();
+    await expect(importBtn).toHaveText('IMPORT');
+  });
+
+  test('export produces valid JSON with log and state', async ({ page }) => {
+    // Seed some data
+    await page.evaluate(() => {
+      localStorage.setItem('basement_lab_log', JSON.stringify({
+        '1_0': { exercise: 'Test', weight: 25, difficulty: 'good', completed: true, day: 1, timestamp: 1 }
+      }));
+      localStorage.setItem('basement_lab_state', JSON.stringify({ globalDay: 3, currentPhase: 'p1' }));
+    });
+    await page.reload();
+
+    // Intercept the download
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.click('#settings-btn').then(() => page.click('#export-btn'))
+    ]);
+
+    expect(download.suggestedFilename()).toMatch(/^flux-backup-\d{4}-\d{2}-\d{2}\.json$/);
+
+    const content = JSON.parse(await (await download.createReadStream()).toArray().then(chunks => Buffer.concat(chunks).toString()));
+    expect(content).toHaveProperty('log');
+    expect(content).toHaveProperty('state');
+    expect(content.log['1_0'].exercise).toBe('Test');
+    expect(content.state.globalDay).toBe(3);
+  });
+
+  test('import merges log entries without overwriting existing data', async ({ page }) => {
+    // Seed existing data
+    await page.evaluate(() => {
+      localStorage.setItem('basement_lab_log', JSON.stringify({
+        '1_0': { exercise: 'Existing', weight: 30, completed: true, day: 1, timestamp: 2 }
+      }));
+      localStorage.setItem('basement_lab_state', JSON.stringify({ globalDay: 5, currentPhase: 'p1' }));
+    });
+    await page.reload();
+
+    // Prepare import file with overlapping key (1_0) and new key (2_0)
+    const importData = JSON.stringify({
+      log: {
+        '1_0': { exercise: 'Overwrite attempt', weight: 99, completed: true, day: 1, timestamp: 1 },
+        '2_0': { exercise: 'New entry', weight: 20, completed: true, day: 2, timestamp: 3 }
+      },
+      state: { globalDay: 10, currentPhase: 'p2' }
+    });
+
+    // Accept the confirm dialog
+    page.on('dialog', async dialog => {
+      if (dialog.type() === 'confirm') await dialog.accept();
+      else await dialog.dismiss();
+    });
+
+    // Trigger import via hidden file input
+    const fileInput = page.locator('#import-file');
+    await fileInput.setInputFiles({
+      name: 'backup.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(importData)
+    });
+
+    // Wait for the alert confirming import
+    await page.waitForEvent('dialog');
+
+    // Verify merge: existing key preserved, new key added
+    const log = await page.evaluate(() => JSON.parse(localStorage.getItem('basement_lab_log')));
+    expect(log['1_0'].exercise).toBe('Existing'); // Not overwritten
+    expect(log['1_0'].weight).toBe(30);
+    expect(log['2_0'].exercise).toBe('New entry'); // Merged in
+
+    // Verify state was NOT overwritten
+    const state = await page.evaluate(() => JSON.parse(localStorage.getItem('basement_lab_state')));
+    expect(state.globalDay).toBe(5); // Still 5, not 10
+  });
 });
