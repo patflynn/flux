@@ -11,6 +11,17 @@ const MODE_KEY = 'basement_lab_mode';
 let programData = null;
 let currentState = null;
 
+// Escape HTML special characters to prevent XSS when inserting into templates
+function escapeHTML(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Initialize app
 async function init() {
   loadState();
@@ -217,8 +228,8 @@ function render() {
                    class="weight-field"
                    data-exercise="${ex.name}"
                    data-key="${exerciseKey}"
-                   value="${currentWeight}"
-                   placeholder="${suggestedWeight}">
+                   value="${escapeHTML(currentWeight)}"
+                   placeholder="${escapeHTML(suggestedWeight)}">
             <button class="weight-btn" data-action="increment" data-key="${exerciseKey}" data-increment="${increment}">+</button>
           </div>
           <span class="unit">lbs</span>
@@ -235,8 +246,8 @@ function render() {
                  class="weight-field"
                  data-exercise="${ex.name}"
                  data-key="${exerciseKey}"
-                 value="${currentWeight}"
-                 placeholder="${lastWeight || '—'}">
+                 value="${escapeHTML(currentWeight)}"
+                 placeholder="${escapeHTML(lastWeight) || '—'}">
           <span class="unit">lbs</span>
         </div>
       `;
@@ -267,16 +278,16 @@ function render() {
           </div>
           <div class="failed-details${currentDifficulty === 'failed' ? ' visible' : ''}" data-key="${exerciseKey}">
             <div class="slider-group">
-              <label>Failed on set: <span class="slider-value">${failedSet}</span> / ${maxSets}</label>
-              <input type="range" class="failed-set-slider" data-key="${exerciseKey}" data-exercise="${ex.name}" min="1" max="${maxSets}" value="${failedSet}">
+              <label>Failed on set: <span class="slider-value">${escapeHTML(failedSet)}</span> / ${maxSets}</label>
+              <input type="range" class="failed-set-slider" data-key="${exerciseKey}" data-exercise="${ex.name}" min="1" max="${maxSets}" value="${escapeHTML(failedSet)}">
             </div>
             <div class="slider-group">
-              <label>Failed on rep: <span class="slider-value">${failedRep}</span> / ${maxReps}</label>
-              <input type="range" class="failed-rep-slider" data-key="${exerciseKey}" data-exercise="${ex.name}" min="1" max="${maxReps}" value="${failedRep}">
+              <label>Failed on rep: <span class="slider-value">${escapeHTML(failedRep)}</span> / ${maxReps}</label>
+              <input type="range" class="failed-rep-slider" data-key="${exerciseKey}" data-exercise="${ex.name}" min="1" max="${maxReps}" value="${escapeHTML(failedRep)}">
             </div>
           </div>
           <div class="notes-input">
-            <textarea class="notes-field" data-key="${exerciseKey}" data-exercise="${ex.name}" placeholder="Notes (optional)">${currentNotes}</textarea>
+            <textarea class="notes-field" data-key="${exerciseKey}" data-exercise="${escapeHTML(ex.name)}" placeholder="Notes (optional)">${escapeHTML(currentNotes)}</textarea>
           </div>
         </div>
       </div>
@@ -812,14 +823,48 @@ function exportData() {
   URL.revokeObjectURL(url);
 }
 
+// Sanitize a log entry to only include expected fields with safe types
+function sanitizeLogEntry(entry) {
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return {};
+  const sanitized = {};
+  if (typeof entry.weight === 'number' || typeof entry.weight === 'string') {
+    sanitized.weight = String(entry.weight).slice(0, 20);
+  }
+  if (typeof entry.difficulty === 'string' && ['easy', 'good', 'hard', 'failed'].includes(entry.difficulty)) {
+    sanitized.difficulty = entry.difficulty;
+  }
+  if (typeof entry.notes === 'string') {
+    sanitized.notes = entry.notes.slice(0, 500);
+  }
+  if (typeof entry.exercise === 'string') {
+    sanitized.exercise = entry.exercise.slice(0, 200);
+  }
+  if (typeof entry.completed === 'boolean') {
+    sanitized.completed = entry.completed;
+  }
+  if (typeof entry.day === 'number' && Number.isFinite(entry.day)) {
+    sanitized.day = entry.day;
+  }
+  if (typeof entry.timestamp === 'number' && Number.isFinite(entry.timestamp)) {
+    sanitized.timestamp = entry.timestamp;
+  }
+  if (typeof entry.failedSet === 'number' && Number.isFinite(entry.failedSet)) {
+    sanitized.failedSet = entry.failedSet;
+  }
+  if (typeof entry.failedRep === 'number' && Number.isFinite(entry.failedRep)) {
+    sanitized.failedRep = entry.failedRep;
+  }
+  return sanitized;
+}
+
 // Import workout data from JSON file
 function importData(file) {
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.log || typeof data.log !== 'object') {
-        alert('Invalid backup file: missing log data.');
+      if (!data.log || typeof data.log !== 'object' || Array.isArray(data.log)) {
+        alert('Invalid backup file: missing or malformed log data.');
         return;
       }
 
@@ -838,7 +883,7 @@ function importData(file) {
       let imported = 0;
       for (const key of importEntries) {
         if (!existingLog[key]) {
-          existingLog[key] = data.log[key];
+          existingLog[key] = sanitizeLogEntry(data.log[key]);
           imported++;
         }
       }
