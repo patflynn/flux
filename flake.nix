@@ -63,7 +63,9 @@
 
           installPhase = ''
             mkdir -p $out
-            cp index.html style.css app.js $out/
+            for f in index.html style.css app.js timer.js manifest.json; do
+              cp $f $out/
+            done
             cp -r data $out/
           '';
         };
