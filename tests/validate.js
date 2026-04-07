@@ -127,21 +127,6 @@ function validatePrinciples() {
     }
   }
 
-  // Check constraints
-  if (!program.meta.constraints) {
-    error('Missing meta.constraints object');
-  } else {
-    if (!program.meta.constraints.mobility_required) {
-      error('meta.constraints.mobility_required must be true');
-    }
-    if (typeof program.meta.constraints.min_mobility_days_per_week !== 'number' ||
-        program.meta.constraints.min_mobility_days_per_week < 1) {
-      error('meta.constraints.min_mobility_days_per_week must be at least 1');
-    } else {
-      success('Mobility constraints configured');
-    }
-  }
-
   // Check each phase has mobility-focused workout
   const mobilityKeywords = ['mobility', 'flexibility', 'recovery', 'stretch', 'flow'];
 

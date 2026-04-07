@@ -1,7 +1,5 @@
 {
   "meta": {
-    "user": "The Engineer",
-    "goal": "Ripped at 47",
     "startDate": "2026-02-09",
     "version": "1.1.0",
     "principles": [
@@ -9,12 +7,7 @@
       "mobility_every_phase",
       "form_over_load",
       "longevity_focus"
-    ],
-    "constraints": {
-      "injury_history": ["neck_shoulder", "lower_back"],
-      "mobility_required": true,
-      "min_mobility_days_per_week": 1
-    }
+    ]
   },
   "phases": [
     {

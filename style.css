@@ -893,6 +893,8 @@ footer {
   max-width: 320px;
   padding: 1.5rem;
   box-shadow: var(--shadow);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .settings-title {
@@ -956,6 +958,61 @@ footer {
   font-size: 0.85rem;
   color: var(--text-primary);
   text-transform: capitalize;
+}
+
+/* =============================================
+   PROFILE EDITOR
+   ============================================= */
+.profile-section {
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.profile-section-label {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.profile-row label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-row input {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color var(--transition);
+}
+
+.profile-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.profile-row-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
 }
 
 .mode-toggle-section {

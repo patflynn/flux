@@ -7,6 +7,7 @@ const STATE_KEY = 'basement_lab_state';
 const LOG_KEY = 'basement_lab_log';
 const THEME_KEY = 'basement_lab_theme';
 const MODE_KEY = 'basement_lab_mode';
+const PROFILE_KEY = 'basement_lab_profile';
 
 let programData = null;
 let currentState = null;
@@ -27,8 +28,69 @@ async function init() {
   loadState();
   initTheme();
   await loadProgram();
+  migrateProfile();
   render();
   bindEvents();
+}
+
+// Load profile from localStorage
+function loadProfile() {
+  const saved = localStorage.getItem(PROFILE_KEY);
+  return saved ? JSON.parse(saved) : null;
+}
+
+// Save profile to localStorage
+function saveProfile(profile) {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+}
+
+// Migrate user-specific data from program.json meta into localStorage profile
+function migrateProfile() {
+  if (loadProfile()) return; // Already migrated
+
+  if (!programData || !programData.meta) return;
+
+  const meta = programData.meta;
+  const profile = {
+    name: meta.user || '',
+    goal: meta.goal || '',
+    age: null,
+    start_date: meta.startDate || '',
+    injury_history: (meta.constraints && meta.constraints.injury_history) || [],
+    equipment: [],
+    time_available: '60min',
+    days_per_week: 5,
+    experience_level: 'intermediate'
+  };
+
+  saveProfile(profile);
+}
+
+// Render profile fields in the settings modal
+function renderProfileEditor() {
+  const profile = loadProfile() || {};
+  const nameInput = document.getElementById('profile-name');
+  const goalInput = document.getElementById('profile-goal');
+  const ageInput = document.getElementById('profile-age');
+  const timeInput = document.getElementById('profile-time');
+  const daysInput = document.getElementById('profile-days');
+  const injuryInput = document.getElementById('profile-injuries');
+  const equipInput = document.getElementById('profile-equipment');
+
+  if (nameInput) nameInput.value = profile.name || '';
+  if (goalInput) goalInput.value = profile.goal || '';
+  if (ageInput) ageInput.value = profile.age || '';
+  if (timeInput) timeInput.value = profile.time_available || '';
+  if (daysInput) daysInput.value = profile.days_per_week || '';
+  if (injuryInput) injuryInput.value = (profile.injury_history || []).join(', ');
+  if (equipInput) equipInput.value = (profile.equipment || []).join(', ');
+}
+
+// Save a single profile field
+function saveProfileField(field, value) {
+  const profile = loadProfile() || {};
+  profile[field] = value;
+  saveProfile(profile);
 }
 
 // Initialize theme and mode from localStorage or system preference
@@ -90,6 +152,7 @@ function updateSettingsUI() {
 // Open settings modal
 function openSettings() {
   updateSettingsUI();
+  renderProfileEditor();
   document.getElementById('settings-modal').classList.remove('hidden');
 }
 
@@ -475,6 +538,22 @@ function bindEvents() {
     document.getElementById('import-file').click();
   });
 
+  // Profile field changes
+  document.querySelectorAll('.profile-field').forEach(field => {
+    field.addEventListener('change', (e) => {
+      const key = e.target.dataset.profileKey;
+      let value = e.target.value;
+
+      if (key === 'age' || key === 'days_per_week') {
+        value = value ? parseInt(value) : null;
+      } else if (key === 'injury_history' || key === 'equipment') {
+        value = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
+      }
+
+      saveProfileField(key, value);
+    });
+  });
+
   // Import file input change
   document.getElementById('import-file').addEventListener('change', (e) => {
     if (e.target.files.length > 0) {
@@ -810,7 +889,8 @@ function closeVideo() {
 function exportData() {
   const log = loadLog();
   const state = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
-  const data = { log: log, state: state };
+  const profile = loadProfile();
+  const data = { profile: profile, log: log, state: state };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -886,6 +966,12 @@ function importData(file) {
           existingLog[key] = sanitizeLogEntry(data.log[key]);
           imported++;
         }
+      }
+
+      // Import profile if present and no existing profile
+      if (data.profile && typeof data.profile === 'object' && !Array.isArray(data.profile) && !loadProfile()) {
+        saveProfile(data.profile);
+        renderProfileEditor();
       }
 
       saveLog(existingLog);

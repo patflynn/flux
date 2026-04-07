@@ -721,10 +721,111 @@ test.describe('Flux PWA', () => {
     expect(download.suggestedFilename()).toMatch(/^flux-backup-\d{4}-\d{2}-\d{2}\.json$/);
 
     const content = JSON.parse(await (await download.createReadStream()).toArray().then(chunks => Buffer.concat(chunks).toString()));
+    expect(content).toHaveProperty('profile');
     expect(content).toHaveProperty('log');
     expect(content).toHaveProperty('state');
     expect(content.log['1_0'].exercise).toBe('Test');
     expect(content.state.globalDay).toBe(3);
+  });
+
+  test('profile is created on first load via migration', async ({ page }) => {
+    // Clear any existing profile
+    await page.evaluate(() => localStorage.removeItem('basement_lab_profile'));
+    await page.reload();
+
+    const profile = await page.evaluate(() => JSON.parse(localStorage.getItem('basement_lab_profile')));
+    expect(profile).toBeTruthy();
+    expect(typeof profile.injury_history).toBe('object'); // array
+    expect(profile).toHaveProperty('name');
+    expect(profile).toHaveProperty('goal');
+  });
+
+  test('profile editor fields are visible in settings', async ({ page }) => {
+    await page.click('#settings-btn');
+    await expect(page.locator('#profile-name')).toBeVisible();
+    await expect(page.locator('#profile-goal')).toBeVisible();
+    await expect(page.locator('#profile-age')).toBeVisible();
+    await expect(page.locator('#profile-equipment')).toBeVisible();
+  });
+
+  test('profile changes persist to localStorage', async ({ page }) => {
+    await page.click('#settings-btn');
+
+    const nameInput = page.locator('#profile-name');
+    await nameInput.fill('Test User');
+    await nameInput.dispatchEvent('change');
+
+    const profile = await page.evaluate(() => JSON.parse(localStorage.getItem('basement_lab_profile')));
+    expect(profile.name).toBe('Test User');
+  });
+
+  test('export includes profile data', async ({ page }) => {
+    // Set a profile
+    await page.evaluate(() => {
+      localStorage.setItem('basement_lab_profile', JSON.stringify({ name: 'Exported User', goal: 'Test' }));
+    });
+    await page.reload();
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.click('#settings-btn').then(() => page.click('#export-btn'))
+    ]);
+
+    const content = JSON.parse(await (await download.createReadStream()).toArray().then(chunks => Buffer.concat(chunks).toString()));
+    expect(content.profile.name).toBe('Exported User');
+  });
+
+  test('import with profile sets profile when none exists', async ({ page }) => {
+    // Remove the profile after page load (migration already ran)
+    // so the import will find no existing profile
+    await page.evaluate(() => localStorage.removeItem('basement_lab_profile'));
+
+    const importPayload = JSON.stringify({
+      profile: { name: 'Imported User', goal: 'Imported Goal' },
+      log: { '1_0': { exercise: 'Test', weight: 10, completed: true, day: 1, timestamp: 1 } },
+      state: { globalDay: 1, currentPhase: 'p1' }
+    });
+
+    page.on('dialog', async dialog => {
+      if (dialog.type() === 'confirm') await dialog.accept();
+      else await dialog.dismiss();
+    });
+
+    const fileInput = page.locator('#import-file');
+    await fileInput.setInputFiles({
+      name: 'backup.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(importPayload)
+    });
+
+    await page.waitForEvent('dialog');
+
+    const profile = await page.evaluate(() => JSON.parse(localStorage.getItem('basement_lab_profile')));
+    expect(profile.name).toBe('Imported User');
+  });
+
+  test('import without profile key still works (backwards compat)', async ({ page }) => {
+    const importPayload = JSON.stringify({
+      log: { '5_0': { exercise: 'Compat', weight: 15, completed: true, day: 5, timestamp: 1 } },
+      state: { globalDay: 5, currentPhase: 'p1' }
+    });
+
+    page.on('dialog', async dialog => {
+      if (dialog.type() === 'confirm') await dialog.accept();
+      else await dialog.dismiss();
+    });
+
+    const fileInput = page.locator('#import-file');
+    await fileInput.setInputFiles({
+      name: 'backup.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(importPayload)
+    });
+
+    await page.waitForEvent('dialog');
+
+    const log = await page.evaluate(() => JSON.parse(localStorage.getItem('basement_lab_log')));
+    expect(log['5_0'].exercise).toBe('Compat');
   });
 
   test('import merges log entries without overwriting existing data', async ({ page }) => {
