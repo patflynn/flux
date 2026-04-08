@@ -20,7 +20,7 @@ jobs:
           token: ${{ secrets.INFRA_DISPATCH_TOKEN }}
           repository: gunk-dev/infra
           event-type: flux-preview
-          client-payload: '{"pr_number": "${{ github.event.pull_request.number }}"}'
+          client-payload: '{"pr_number": "${{ github.event.pull_request.number }}", "head_sha": "${{ github.event.pull_request.head.sha }}"}'
 
   dispatch-cleanup:
     name: Dispatch Preview Cleanup
