@@ -126,6 +126,7 @@ body {
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 /* =============================================
@@ -139,7 +140,6 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  position: relative;
   box-shadow: var(--shadow);
 }
 
@@ -355,6 +355,7 @@ main {
 .weight-input {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
