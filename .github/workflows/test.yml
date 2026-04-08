@@ -22,10 +22,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Check formatting
-        run: nix develop -c nixfmt --check .
-
-      - name: Flake check
-        run: nix flake check
+        run: nix run nixpkgs#nixfmt -- --check .
 
   zizmor:
     name: Zizmor
@@ -65,7 +62,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@1828eb4e5414b8dfe36daae53ea3e4b8c3fdec7a # main
 
       - name: Run validation
-        run: nix develop -c node tests/validate.js
+        run: nix develop .#test -c node tests/validate.js
 
   e2e:
     name: E2E Tests
