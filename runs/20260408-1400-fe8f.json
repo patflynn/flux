@@ -1,0 +1,17 @@
+{
+  "id": "20260408-1400-fe8f",
+  "prompt": "Add version/commit display to the app UI. The user wants to see what version/commit/branch is deployed, especially useful across staging/preview/prod.\n\n## Approach\n\n### 1. Generate version.json at build time (flake.nix)\n\nIn `flake.nix`, the `packages.default` derivation (line 51) should generate a `version.json` file during `installPhase`. Nix flakes expose `self.rev` (full SHA) and `self.shortRev` (7-char) when built from a clean git tree, and `self.dirtyRev`/`self.dirtyShortRev` for dirty trees.\n\nChange the derivation to accept the rev. Use nix string interpolation of `self.shortRev or \"dev\"` to embed the commit hash into a version.json written in installPhase. Note: `self.shortRev` is only available when the tree is clean. Use `self.shortRev or \"dev\"` for dirty/local builds.\n\nAlso make sure timer.js and manifest.json are copied in installPhase (they should already be there from a recent fix).\n\n### 2. Fetch and display version in the app (app.js + index.html + style.css)\n\nIn `app.js`:\n- Add an async function `loadVersion()` that fetches `version.json` (with a try/catch for 404 in dev mode)\n- Display the commit in the settings modal via `document.getElementById(\"version-info\")`\n- Format as: `v1.0.0 · abc1234`\n- Call `loadVersion()` during `init()`\n\nIn `index.html`, add a version display element at the bottom of the settings modal content (just before the closing `\u003c/div\u003e` of `.settings-content`, around line 94):\n```html\n\u003cdiv class=\"version-info\" id=\"version-info\"\u003e\u003c/div\u003e\n```\n\nIn `style.css`, add minimal styling for `.version-info`: small font (0.7rem), muted color (var(--text-secondary)), centered, with a top border separator, opacity 0.6.\n\n### Key files:\n- `flake.nix` — derivation installPhase (line 51-61)\n- `app.js` — add loadVersion function, call in init()\n- `index.html` — add version-info div in settings modal (before line 94)\n- `style.css` — add .version-info styles\n\n### Constraints:\n- Keep it subtle — small muted text at the bottom of the settings modal\n- Gracefully handle missing version.json (dev mode / local serve)\n- Do not break existing e2e tests\n- Run the e2e tests before creating the PR: `npx playwright test`\n- The flake.nix change is important — the nix expression must be valid. The interpolation of `self.shortRev` happens at the flake level via nix string interpolation, not bash.",
+  "issue": "58",
+  "branch": "agent/20260408-1400-fe8f",
+  "worktree": "/tmp/klaus-sessions/flux/20260408-1400-fe8f",
+  "tmux_pane": "%7",
+  "budget": "5.00",
+  "log_file": "/home/patrick/.klaus/sessions/session-20260407-1651-0aa4/logs/20260408-1400-fe8f.jsonl",
+  "created_at": "2026-04-08T14:00:42-04:00",
+  "cost_usd": 0.6717744999999999,
+  "duration_ms": 109195,
+  "pr_url": "https://github.com/gunk-dev/flux/pull/60",
+  "target_repo": "flux",
+  "clone_dir": "/home/patrick/hack/flux",
+  "session_name": "20260408-1400-fe8f"
+}
