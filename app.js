@@ -55,7 +55,6 @@ function migrateProfile() {
     name: meta.user || '',
     goal: meta.goal || '',
     age: null,
-    start_date: meta.startDate || '',
     injury_history: (meta.constraints && meta.constraints.injury_history) || [],
     equipment: [],
     time_available: '60min',
@@ -904,6 +903,32 @@ function exportData() {
 }
 
 // Sanitize a log entry to only include expected fields with safe types
+function sanitizeProfile(profile) {
+  if (!profile || typeof profile !== 'object' || Array.isArray(profile)) return {};
+  const sanitized = {};
+  if (typeof profile.name === 'string') sanitized.name = profile.name.slice(0, 100);
+  if (typeof profile.goal === 'string') sanitized.goal = profile.goal.slice(0, 200);
+  if (typeof profile.age === 'number' && Number.isFinite(profile.age) && profile.age > 0 && profile.age <= 120) {
+    sanitized.age = profile.age;
+  } else {
+    sanitized.age = null;
+  }
+  if (typeof profile.time_available === 'string') sanitized.time_available = profile.time_available.slice(0, 50);
+  if (typeof profile.days_per_week === 'number' && Number.isFinite(profile.days_per_week) && profile.days_per_week >= 1 && profile.days_per_week <= 7) {
+    sanitized.days_per_week = profile.days_per_week;
+  }
+  if (Array.isArray(profile.injury_history)) {
+    sanitized.injury_history = profile.injury_history.filter(i => typeof i === 'string').map(i => i.slice(0, 100)).slice(0, 20);
+  }
+  if (Array.isArray(profile.equipment)) {
+    sanitized.equipment = profile.equipment.filter(i => typeof i === 'string').map(i => i.slice(0, 100)).slice(0, 50);
+  }
+  if (typeof profile.experience_level === 'string' && ['beginner', 'intermediate', 'advanced'].includes(profile.experience_level)) {
+    sanitized.experience_level = profile.experience_level;
+  }
+  return sanitized;
+}
+
 function sanitizeLogEntry(entry) {
   if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return {};
   const sanitized = {};
@@ -968,9 +993,9 @@ function importData(file) {
         }
       }
 
-      // Import profile if present and no existing profile
-      if (data.profile && typeof data.profile === 'object' && !Array.isArray(data.profile) && !loadProfile()) {
-        saveProfile(data.profile);
+      // Import profile if present
+      if (data.profile && typeof data.profile === 'object' && !Array.isArray(data.profile)) {
+        saveProfile(sanitizeProfile(data.profile));
         renderProfileEditor();
       }
 
