@@ -31,6 +31,23 @@ async function init() {
   migrateProfile();
   render();
   bindEvents();
+  loadVersion();
+}
+
+// Load version info from version.json (generated at build time)
+async function loadVersion() {
+  try {
+    const resp = await fetch('version.json');
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const el = document.getElementById('version-info');
+    if (el && data.version) {
+      const commit = data.commit && data.commit !== 'dev' ? ` · ${data.commit}` : '';
+      el.textContent = `v${data.version}${commit}`;
+    }
+  } catch (error) {
+    console.warn('Could not load version info:', error);
+  }
 }
 
 // Load profile from localStorage

@@ -1096,6 +1096,19 @@ footer {
 }
 
 /* =============================================
+   VERSION INFO
+   ============================================= */
+.version-info {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-align: center;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: 1.25rem;
+  opacity: 0.6;
+}
+
+/* =============================================
    UTILITY CLASSES
    ============================================= */
 .hidden {

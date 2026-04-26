@@ -56,19 +56,29 @@
           '';
         };
 
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "flux";
-          version = "1.0.0";
-          src = ./.;
+        packages.default =
+          let
+            commit = self.shortRev or self.dirtyShortRev or "dev";
+            ver = "1.0.0";
+            versionJSON = builtins.toJSON {
+              version = ver;
+              inherit commit;
+            };
+          in
+          pkgs.stdenv.mkDerivation {
+            pname = "flux";
+            version = ver;
+            src = ./.;
 
-          installPhase = ''
-            mkdir -p $out
-            for f in index.html style.css app.js timer.js manifest.json; do
-              cp $f $out/
-            done
-            cp -r data $out/
-          '';
-        };
+            installPhase = ''
+              mkdir -p $out
+              for f in index.html style.css app.js timer.js manifest.json; do
+                cp $f $out/
+              done
+              cp -r data $out/
+              echo '${versionJSON}' > $out/version.json
+            '';
+          };
       }
     );
 }
