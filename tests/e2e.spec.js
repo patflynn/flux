@@ -115,21 +115,24 @@ test.describe('Flux PWA', () => {
     await expect(page.locator('#workout-card')).toBeHidden();
   });
 
-  test('has dark mode colors', async ({ page }) => {
-    // Ensure dark mode for this test
-    await page.evaluate(() => {
-      localStorage.setItem('basement_lab_theme', 'cyberpunk');
-      localStorage.setItem('basement_lab_mode', 'dark');
-    });
+  test('applies dark mode background', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('basement_lab_mode', 'dark'));
     await page.reload();
 
-    const body = page.locator('body');
-    const bgColor = await body.evaluate(el =>
-      getComputedStyle(el).backgroundColor
-    );
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'dark');
 
-    // Should be dark (rgb values close to 0)
-    expect(bgColor).toMatch(/rgb\(\s*10,\s*10,\s*10\s*\)/);
+    // Whatever the exact color, dark mode should be visibly darker than light text.
+    // Parse the rgb() and ensure the bg luminance is well below the text luminance.
+    const { bg, fg } = await page.locator('body').evaluate(el => ({
+      bg: getComputedStyle(el).backgroundColor,
+      fg: getComputedStyle(el).color,
+    }));
+    const lum = s => {
+      const m = s.match(/\d+/g);
+      return m ? (parseInt(m[0]) + parseInt(m[1]) + parseInt(m[2])) / 3 : 0;
+    };
+    expect(lum(bg)).toBeLessThan(lum(fg));
+    expect(lum(bg)).toBeLessThan(80);
   });
 
   test('done button marks exercise complete and expands feedback', async ({ page }) => {
@@ -281,43 +284,19 @@ test.describe('Flux PWA', () => {
     await expect(settingsModal).toBeHidden();
   });
 
-  test('theme selection changes data-theme attribute', async ({ page }) => {
-    const html = page.locator('html');
-
-    // Open settings
+  test('theme picker is no longer present', async ({ page }) => {
+    // The 4-theme picker was removed; the settings modal should not contain it.
     await page.locator('#settings-btn').click();
-
-    // Default should be cyberpunk
-    await expect(html).toHaveAttribute('data-theme', 'cyberpunk');
-
-    // Select material theme
-    await page.locator('.theme-option[data-theme="material"]').click();
-    await expect(html).toHaveAttribute('data-theme', 'material');
-
-    // Select ocean theme
-    await page.locator('.theme-option[data-theme="ocean"]').click();
-    await expect(html).toHaveAttribute('data-theme', 'ocean');
-
-    // Select ember theme
-    await page.locator('.theme-option[data-theme="ember"]').click();
-    await expect(html).toHaveAttribute('data-theme', 'ember');
+    await expect(page.locator('.theme-grid')).toHaveCount(0);
+    await expect(page.locator('.theme-option')).toHaveCount(0);
   });
 
-  test('theme selection updates active state', async ({ page }) => {
-    // Open settings
-    await page.locator('#settings-btn').click();
-
-    const cyberpunkOption = page.locator('.theme-option[data-theme="cyberpunk"]');
-    const materialOption = page.locator('.theme-option[data-theme="material"]');
-
-    // Default cyberpunk should be active
-    await expect(cyberpunkOption).toHaveClass(/active/);
-    await expect(materialOption).not.toHaveClass(/active/);
-
-    // Select material
-    await materialOption.click();
-    await expect(materialOption).toHaveClass(/active/);
-    await expect(cyberpunkOption).not.toHaveClass(/active/);
+  test('legacy basement_lab_theme is cleaned up on load', async ({ page }) => {
+    // Seed the legacy key, reload, verify it gets removed.
+    await page.evaluate(() => localStorage.setItem('basement_lab_theme', 'cyberpunk'));
+    await page.reload();
+    const value = await page.evaluate(() => localStorage.getItem('basement_lab_theme'));
+    expect(value).toBeNull();
   });
 
   test('mode toggle switches between light and dark', async ({ page }) => {
@@ -363,21 +342,6 @@ test.describe('Flux PWA', () => {
     await expect(darkBtn).not.toHaveClass(/active/);
   });
 
-  test('theme persists after reload', async ({ page }) => {
-    const html = page.locator('html');
-
-    // Open settings and select material theme
-    await page.locator('#settings-btn').click();
-    await page.locator('.theme-option[data-theme="material"]').click();
-    await expect(html).toHaveAttribute('data-theme', 'material');
-
-    // Reload
-    await page.reload();
-
-    // Should still be material theme
-    await expect(html).toHaveAttribute('data-theme', 'material');
-  });
-
   test('mode persists after reload', async ({ page }) => {
     const html = page.locator('html');
 
@@ -397,25 +361,6 @@ test.describe('Flux PWA', () => {
     await expect(html).toHaveAttribute('data-mode', 'light');
   });
 
-  test('theme and mode can be set independently', async ({ page }) => {
-    const html = page.locator('html');
-
-    // Open settings
-    await page.locator('#settings-btn').click();
-
-    // Set material theme + light mode
-    await page.locator('.theme-option[data-theme="material"]').click();
-    await page.locator('.mode-btn[data-mode="light"]').click();
-
-    await expect(html).toHaveAttribute('data-theme', 'material');
-    await expect(html).toHaveAttribute('data-mode', 'light');
-
-    // Reload and verify
-    await page.reload();
-    await expect(html).toHaveAttribute('data-theme', 'material');
-    await expect(html).toHaveAttribute('data-mode', 'light');
-  });
-
   test('mode respects system preference on first load', async ({ page }) => {
     // Clear localStorage to simulate first visit
     await page.evaluate(() => {
@@ -431,33 +376,12 @@ test.describe('Flux PWA', () => {
     await expect(html).toHaveAttribute('data-mode', 'light');
   });
 
-  test('material theme uses system font', async ({ page }) => {
-    // Set material theme
-    await page.evaluate(() => localStorage.setItem('basement_lab_theme', 'material'));
-    await page.reload();
-
-    const body = page.locator('body');
-    const fontFamily = await body.evaluate(el =>
+  test('body uses sans-serif font', async ({ page }) => {
+    const fontFamily = await page.locator('body').evaluate(el =>
       getComputedStyle(el).fontFamily
     );
-
-    // Should contain system-ui or sans-serif, not monospace
-    expect(fontFamily).toMatch(/system-ui|sans-serif/i);
-    expect(fontFamily).not.toMatch(/courier|monospace/i);
-  });
-
-  test('cyberpunk theme uses monospace font', async ({ page }) => {
-    // Ensure cyberpunk theme
-    await page.evaluate(() => localStorage.setItem('basement_lab_theme', 'cyberpunk'));
-    await page.reload();
-
-    const body = page.locator('body');
-    const fontFamily = await body.evaluate(el =>
-      getComputedStyle(el).fontFamily
-    );
-
-    // Should contain Courier or monospace
-    expect(fontFamily).toMatch(/courier|monospace/i);
+    expect(fontFamily).toMatch(/Inter|system-ui|sans-serif/i);
+    expect(fontFamily).not.toMatch(/courier/i);
   });
 
   // =============================================
@@ -657,35 +581,6 @@ test.describe('Flux PWA', () => {
       expect(value || '').not.toContain('NaN');
       expect(placeholder || '').not.toContain('NaN');
     }
-  });
-
-  test('each theme has distinct accent color', async ({ page }) => {
-    const getAccentColor = async () => {
-      const header = page.locator('header h1');
-      return header.evaluate(el => getComputedStyle(el).color);
-    };
-
-    // Get color for each theme
-    await page.evaluate(() => localStorage.setItem('basement_lab_theme', 'cyberpunk'));
-    await page.reload();
-    const cyberpunkColor = await getAccentColor();
-
-    await page.evaluate(() => localStorage.setItem('basement_lab_theme', 'material'));
-    await page.reload();
-    const materialColor = await getAccentColor();
-
-    await page.evaluate(() => localStorage.setItem('basement_lab_theme', 'ocean'));
-    await page.reload();
-    const oceanColor = await getAccentColor();
-
-    await page.evaluate(() => localStorage.setItem('basement_lab_theme', 'ember'));
-    await page.reload();
-    const emberColor = await getAccentColor();
-
-    // All should be different
-    const colors = [cyberpunkColor, materialColor, oceanColor, emberColor];
-    const uniqueColors = [...new Set(colors)];
-    expect(uniqueColors.length).toBe(4);
   });
 
   test('export button is visible in settings modal', async ({ page }) => {

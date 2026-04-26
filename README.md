@@ -6,7 +6,7 @@ A static, mobile-first PWA to track and execute on a fitness goal.
 
 ## Features
 
-- Dark mode cyberpunk/terminal aesthetic
+- Light/dark mode toggle with system preference fallback
 - Workout programs loaded from JSON
 - Tracks current day (1-365) with localStorage
 - Weight logging per exercise with history

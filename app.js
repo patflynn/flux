@@ -5,9 +5,11 @@
 
 const STATE_KEY = 'basement_lab_state';
 const LOG_KEY = 'basement_lab_log';
-const THEME_KEY = 'basement_lab_theme';
 const MODE_KEY = 'basement_lab_mode';
 const PROFILE_KEY = 'basement_lab_profile';
+
+// Drop legacy 4-theme key from old installs.
+try { localStorage.removeItem('basement_lab_theme'); } catch (e) {}
 
 let programData = null;
 let currentState = null;
@@ -26,7 +28,7 @@ function escapeHTML(str) {
 // Initialize app
 async function init() {
   loadState();
-  initTheme();
+  initMode();
   await loadProgram();
   migrateProfile();
   render();
@@ -109,22 +111,12 @@ function saveProfileField(field, value) {
   saveProfile(profile);
 }
 
-// Initialize theme and mode from localStorage or system preference
-function initTheme() {
-  const savedTheme = localStorage.getItem(THEME_KEY) || 'cyberpunk';
+// Initialize mode from localStorage or system preference
+function initMode() {
   const savedMode = localStorage.getItem(MODE_KEY) ||
     (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
 
-  setTheme(savedTheme);
   setMode(savedMode);
-  updateSettingsUI();
-}
-
-// Set theme (cyberpunk, material, ocean, ember)
-function setTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem(THEME_KEY, theme);
-  updateSettingsUI();
 }
 
 // Set mode (dark, light)
@@ -141,21 +133,10 @@ function setMode(mode) {
   updateSettingsUI();
 }
 
-// Update settings modal UI to reflect current theme/mode
+// Update mode buttons in settings modal to reflect current mode
 function updateSettingsUI() {
-  const currentTheme = document.documentElement.getAttribute('data-theme') || 'cyberpunk';
   const currentMode = document.documentElement.getAttribute('data-mode') || 'dark';
 
-  // Update theme options
-  document.querySelectorAll('.theme-option').forEach(option => {
-    if (option.dataset.theme === currentTheme) {
-      option.classList.add('active');
-    } else {
-      option.classList.remove('active');
-    }
-  });
-
-  // Update mode buttons
   document.querySelectorAll('.mode-btn').forEach(btn => {
     if (btn.dataset.mode === currentMode) {
       btn.classList.add('active');
@@ -529,13 +510,6 @@ function bindEvents() {
     if (e.target.id === 'settings-modal') {
       closeSettings();
     }
-  });
-
-  // Theme selection
-  document.querySelectorAll('.theme-option').forEach(option => {
-    option.addEventListener('click', () => {
-      setTheme(option.dataset.theme);
-    });
   });
 
   // Mode toggle

@@ -10,11 +10,10 @@
 
   <script>
     (function() {
-      var theme = localStorage.getItem('basement_lab_theme') || 'cyberpunk';
       var mode = localStorage.getItem('basement_lab_mode') ||
         (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-      document.documentElement.setAttribute('data-theme', theme);
       document.documentElement.setAttribute('data-mode', mode);
+      try { localStorage.removeItem('basement_lab_theme'); } catch (e) {}
     })();
   </script>
   <link rel="stylesheet" href="style.css">
@@ -64,24 +63,6 @@
   <div id="settings-modal" class="settings-modal hidden">
     <div class="settings-content">
       <h3 class="settings-title">SETTINGS</h3>
-      <div class="theme-grid">
-        <div class="theme-option" data-theme="cyberpunk">
-          <div class="theme-swatch"></div>
-          <div class="theme-name">Cyberpunk</div>
-        </div>
-        <div class="theme-option" data-theme="material">
-          <div class="theme-swatch"></div>
-          <div class="theme-name">Material</div>
-        </div>
-        <div class="theme-option" data-theme="ocean">
-          <div class="theme-swatch"></div>
-          <div class="theme-name">Ocean</div>
-        </div>
-        <div class="theme-option" data-theme="ember">
-          <div class="theme-swatch"></div>
-          <div class="theme-name">Ember</div>
-        </div>
-      </div>
       <div class="profile-section">
         <span class="profile-section-label">Profile</span>
         <div class="profile-fields">
