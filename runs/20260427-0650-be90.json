@@ -1,0 +1,20 @@
+{
+  "id": "20260427-0650-be90",
+  "prompt": "PR #63 has merge conflicts with the base branch. Rebase onto main, resolve all conflicts, and push. Run tests after resolving.",
+  "issue": null,
+  "pr": "63",
+  "branch": "docs/refresh-readme",
+  "worktree": "/tmp/klaus-sessions/flux/20260427-0650-be90",
+  "tmux_pane": "%7",
+  "budget": "5.00",
+  "log_file": "/home/patrick/.klaus/sessions/session-20260424-1649-723e/logs/20260427-0650-be90.jsonl",
+  "created_at": "2026-04-27T06:50:49-04:00",
+  "cost_usd": null,
+  "duration_ms": null,
+  "pr_url": "https://github.com/gunk-dev/flux/pull/63",
+  "type": "pr-fix",
+  "target_repo": "flux",
+  "clone_dir": "/home/patrick/hack/flux",
+  "session_name": "20260427-0650-be90",
+  "original_run_id": "20260427-0631-d43f"
+}
