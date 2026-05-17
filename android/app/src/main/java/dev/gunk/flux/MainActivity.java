@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 
 import com.getcapacitor.BridgeActivity;
 
@@ -12,25 +14,29 @@ import com.getcapacitor.BridgeActivity;
  * Single activity that hosts the WebView. Three <activity-alias> entries in
  * AndroidManifest.xml point here, each carrying an "entry" meta-data value
  * (flux | vibe | balance). We read the alias's component info from the
- * launching intent and inject `window.__entry` so the Preact shell can pick
- * the right initial tab.
+ * launching intent and expose the result to the Preact shell.
  *
- * We inject via evaluateJavascript after the page finishes loading rather than
- * via an addJavascriptInterface or pre-load script tag — Capacitor's WebView
- * runs the bundle synchronously after page-start, and evaluateJavascript on
- * page-finished is the simplest way to land a global before the app reads it
- * on tab-switch. The Preact shell defaults to 'flux' if window.__entry is
- * unset, so a missed injection still produces a working app.
+ * Two channels:
+ *  - `window.AppEntry.getEntry()` — synchronous JS interface, safe to call at
+ *    document-start. The Preact shell calls this to pick the initial tab,
+ *    avoiding the evaluateJavascript race where the global may be unset when
+ *    the bundle first executes.
+ *  - `window` event `app-entry-changed` — dispatched after onNewIntent updates
+ *    the entry (user re-launched a different alias while the app is already
+ *    running). The App component listens for this and switches tabs.
  */
 public class MainActivity extends BridgeActivity {
 
-    private String currentEntry = "flux";
+    private volatile String currentEntry = "flux";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         currentEntry = readEntryFromIntent(getIntent());
-        injectEntry(currentEntry);
+        WebView webView = bridge != null ? bridge.getWebView() : null;
+        if (webView != null) {
+            webView.addJavascriptInterface(new AppEntryBridge(), "AppEntry");
+        }
     }
 
     @Override
@@ -38,7 +44,7 @@ public class MainActivity extends BridgeActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         currentEntry = readEntryFromIntent(intent);
-        injectEntry(currentEntry);
+        notifyEntryChanged(currentEntry);
     }
 
     private String readEntryFromIntent(Intent intent) {
@@ -58,11 +64,28 @@ public class MainActivity extends BridgeActivity {
         return "flux";
     }
 
-    private void injectEntry(String entry) {
+    private void notifyEntryChanged(String entry) {
         if (bridge == null || bridge.getWebView() == null) return;
-        final String safe = entry.replace("'", "");
+        // entry comes from a hard-coded manifest meta-data string, but we still
+        // restrict to a known whitelist before splicing into JS.
+        if (!entry.equals("flux") && !entry.equals("vibe") && !entry.equals("balance")) {
+            entry = "flux";
+        }
+        final String safe = entry;
         bridge.getWebView().post(() ->
             bridge.getWebView().evaluateJavascript(
-                "window.__entry = '" + safe + "';", null));
+                "window.dispatchEvent(new CustomEvent('app-entry-changed', { detail: '"
+                    + safe + "' }));", null));
+    }
+
+    /**
+     * Synchronous bridge that the Preact shell calls to read the entry at
+     * startup. Must remain side-effect free.
+     */
+    public class AppEntryBridge {
+        @JavascriptInterface
+        public String getEntry() {
+            return currentEntry;
+        }
     }
 }

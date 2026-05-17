@@ -46,7 +46,7 @@ in CI yet.
 ```
 ├── index.html              # Vite entry
 ├── src/
-│   ├── main.tsx            # Preact entry; reads window.__entry
+│   ├── main.tsx            # Preact entry; reads window.AppEntry bridge
 │   ├── App.tsx             # Tab shell
 │   ├── tabs/               # Workouts, Meditate, Checkin, Settings
 │   ├── llm/                # Provider-agnostic generate() interface

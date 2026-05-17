@@ -20,9 +20,11 @@
         <!--
             Three launcher aliases all point at MainActivity. The launcher shows
             three icons; under the hood it's one APK / one process / shared storage.
-            MainActivity reads the per-alias `entry` meta-data and injects
-            window.__entry before/at WebView load. Placeholder icons in PR 1 —
-            distinct icons come in later PRs.
+            MainActivity reads the per-alias `entry` meta-data and exposes it
+            to the WebView via a synchronous JS bridge (`window.AppEntry`); on
+            re-launch a `app-entry-changed` event is dispatched so the running
+            app can switch tabs. Placeholder icons in PR 1 — distinct icons
+            come in later PRs.
         -->
         <activity-alias
             android:name=".FluxLauncher"
