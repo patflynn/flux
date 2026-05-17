@@ -1,5 +1,7 @@
 # Flux: Implementation Roadmap
 
+> **Status note (2026-05-11):** Flux is being folded into a three-tab umbrella app (workouts + meditation + wellness check-ins) shipped as a Capacitor Android build and web PWA. See [`UMBRELLA-PLAN.md`](UMBRELLA-PLAN.md) for the new direction and build order. The phases below are retained as historical reference; the work they describe is being reshaped under the umbrella plan's PR sequence (notably PR 2, which ports the existing fitness logic into the Workouts tab).
+
 ## Phase 1: Foundation Refactor
 
 Separate the app from user data. Everything else builds on this.

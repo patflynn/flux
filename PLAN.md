@@ -1,5 +1,7 @@
 # Flux - Project Plan
 
+> **Status note (2026-05-11):** This standalone fitness-PWA plan is being subsumed into a larger umbrella app that unifies Flux with two sibling apps (vibe, balance) under one Capacitor-wrapped Android shell + web build. See [`docs/UMBRELLA-PLAN.md`](docs/UMBRELLA-PLAN.md) for the new direction. The program-philosophy and data-model content below remains load-bearing for the Workouts tab of the umbrella app, so it is preserved intact.
+
 **Goal:** Build a static, mobile-first PWA to track a 12-month bodybuilding transformation.
 
 **Stack:** Vanilla HTML/JS/CSS (for NixOS static hosting)
