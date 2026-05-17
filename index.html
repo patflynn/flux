@@ -1,94 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0a0a">
-  <meta name="description" content="Flux - 12 Month Transformation Tracker">
-
-  <title>Flux</title>
-
-  <script>
-    (function() {
-      var mode = localStorage.getItem('basement_lab_mode') ||
-        (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-      document.documentElement.setAttribute('data-mode', mode);
-      try { localStorage.removeItem('basement_lab_theme'); } catch (e) {}
-    })();
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="32x32" href="data/favicon-32.png">
-  <link rel="apple-touch-icon" href="data/apple-touch-icon.png">
-</head>
-<body>
-  <header>
-    <h1>FLUX</h1>
-    <div id="day-counter">DAY <span id="current-day">1</span>/365</div>
-    <button id="settings-btn" class="settings-btn" aria-label="Settings">&#9881;</button>
-    <div id="session-progress"><div id="session-progress-bar"></div></div>
-  </header>
-
-  <main id="app">
-    <section id="workout-card" class="card">
-      <div id="workout-header">
-        <h2 id="workout-name">Loading...</h2>
-        <p id="workout-focus"></p>
-      </div>
-
-      <div id="exercises-list"></div>
-    </section>
-
-    <section id="rest-day" class="card hidden">
-      <h2>REST DAY</h2>
-      <p>Recovery is growth. Stay hydrated.</p>
-    </section>
-  </main>
-
-  <footer>
-    <button id="back-btn" class="btn-secondary">&larr;</button>
-    <button id="complete-btn" class="btn-primary">COMPLETE & ADVANCE</button>
-    <button id="reset-btn" class="btn-secondary">Reset</button>
-  </footer>
-
-  <!-- Video Modal -->
-  <div id="video-modal" class="modal hidden">
-    <div class="modal-content">
-      <button id="close-modal" class="close-btn">&times;</button>
-      <div id="video-container"></div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div id="settings-modal" class="settings-modal hidden">
-    <div class="settings-content">
-      <h3 class="settings-title">SETTINGS</h3>
-      <div class="mode-toggle-section">
-        <div class="mode-toggle-row">
-          <span class="mode-label">Appearance</span>
-          <div class="mode-toggle">
-            <button class="mode-btn" data-mode="light">&#9788;</button>
-            <button class="mode-btn" data-mode="dark">&#9790;</button>
-          </div>
-        </div>
-      </div>
-      <div class="data-section">
-        <span class="data-label">Data</span>
-        <div class="data-buttons">
-          <button id="export-btn" class="data-btn">EXPORT</button>
-          <button id="import-btn" class="data-btn">IMPORT</button>
-        </div>
-      </div>
-      <div class="version-info" id="version-info"></div>
-    </div>
-  </div>
-
-  <input type="file" id="import-file" accept=".json" class="hidden">
-
-  <script src="timer.js"></script>
-  <script src="app.js"></script>
-</body>
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#0a0a0a" />
+    <title>Flux</title>
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

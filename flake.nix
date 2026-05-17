@@ -1,5 +1,5 @@
 {
-  description = "Flux - PWA workout tracker";
+  description = "Flux - Umbrella app (Workouts, Meditate, Check-in)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -26,8 +26,6 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             nodejs_20
-            nodePackages.serve
-            imagemagick
             nixfmt-rfc-style
             klaus.packages.${system}.default
           ];
@@ -35,8 +33,9 @@
           shellHook = ''
             echo "Flux dev shell"
             echo "Commands:"
-            echo "  serve .             - Start local server"
-            echo "  node tests/validate.js  - Run validation"
+            echo "  npm ci             - Install dependencies"
+            echo "  npm run dev        - Vite dev server"
+            echo "  npm run build      - Production build to dist/"
           '';
         };
 
@@ -44,14 +43,13 @@
         devShells.test = pkgs.mkShell {
           buildInputs = with pkgs; [
             nodejs_20
-            nodePackages.serve
             playwright-driver.browsers
           ];
 
           shellHook = ''
             export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
             export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-            npm install --prefer-offline --no-audit --no-fund --quiet
+            npm ci --prefer-offline --no-audit --no-fund --quiet
             echo "Flux test shell (with Playwright)"
           '';
         };
@@ -65,18 +63,27 @@
               inherit commit;
             };
           in
-          pkgs.stdenv.mkDerivation {
+          pkgs.buildNpmPackage {
             pname = "flux";
             version = ver;
             src = ./.;
 
+            # Run `prefetch-npm-deps package-lock.json` to refresh after
+            # dependency changes. Lockfile-derived hash; updates when the
+            # lockfile changes.
+            npmDepsHash = "sha256-fUhyKOMkITX+xxb0wONkkXjFLzLzCoi4IxR7X7C1d88=";
+
+            # Capacitor's optional Android peer dep tries to run a gradle task
+            # in postinstall; skip it since we only ship the web bundle here.
+            npmFlags = [ "--ignore-scripts" ];
+
             installPhase = ''
+              runHook preInstall
+              npm run build
               mkdir -p $out
-              for f in index.html style.css app.js timer.js manifest.json; do
-                cp $f $out/
-              done
-              cp -r data $out/
+              cp -r dist/* $out/
               echo '${versionJSON}' > $out/version.json
+              runHook postInstall
             '';
           };
       }

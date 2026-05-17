@@ -1,52 +1,57 @@
 # Flux
 
-A static, mobile-first PWA to track and execute on a fitness goal.
+Umbrella app for Workouts, Meditate, and Check-in. Ships as a web PWA at
+[flux.gunk.dev](https://flux.gunk.dev) and as a single Android APK with three
+launcher icons (one per tab).
 
-**Live App:** https://flux.gunk.dev
-
-## Features
-
-- Light/dark mode toggle with system preference fallback
-- Workout programs loaded from JSON
-- Tracks current day (1-365) with localStorage
-- Weight logging per exercise with history
-- YouTube video embeds for form checks
-- Works offline (PWA)
+See `docs/UMBRELLA-PLAN.md` for the plan and `docs/VISION.md` / `docs/DESIGN.md`
+for product intent.
 
 ## Stack
 
-- Vanilla HTML/JS/CSS
-- No build step required for local development
-- Production deploys to fly.io via the gunk-dev preview/prod pipeline; PRs get preview deployments at `https://flux-preview-<PR>.fly.dev/` via the Deploy Flux Preview workflow
+- Vite + Preact + TypeScript + Tailwind CSS
+- Capacitor for the native Android shell (`@capacitor/{core,cli,android,app,haptics}`)
+- Playwright for e2e tests
+- No router, no state library, no UI component library
 
 ## Development
 
+All commands run inside `nix develop` (nix is mandatory per `CLAUDE.md`):
+
 ```bash
-# Enter dev shell
-nix develop
-
-# Start local server
-serve .
-
-# Run validation
-node tests/validate.js
-
-# Run E2E tests
-nix develop .#test
-npm ci
-npx playwright test
+nix develop --command npm ci          # install deps
+nix develop --command npm run dev     # Vite dev server on :3030
+nix develop --command npm run build   # production build to dist/
 ```
 
-## Project Structure
+E2E tests use a separate shell that ships Playwright browsers:
+
+```bash
+nix develop .#test --command npx playwright test
+```
+
+## Android
+
+```bash
+nix develop --command npm run build
+npx cap sync android
+cd android && ./gradlew assembleDebug
+```
+
+The Android build requires a host-installed Android SDK + JDK; it is not run
+in CI yet.
+
+## Project layout
 
 ```
-├── index.html      # App shell
-├── style.css       # Theme styles
-├── app.js          # Core logic
-├── data/
-│   └── program.json   # Workout program data
-├── tests/
-│   ├── validate.js    # Schema validation
-│   └── e2e.spec.js    # Playwright tests
-└── PLAN.md         # Project roadmap
+├── index.html              # Vite entry
+├── src/
+│   ├── main.tsx            # Preact entry; reads window.__entry
+│   ├── App.tsx             # Tab shell
+│   ├── tabs/               # Workouts, Meditate, Checkin, Settings
+│   ├── llm/                # Provider-agnostic generate() interface
+│   └── db/                 # Per-tab IndexedDB stores (added in feature PRs)
+├── android/                # Capacitor-scaffolded Android project
+├── tests/smoke.spec.ts     # Playwright smoke test
+└── capacitor.config.ts
 ```
