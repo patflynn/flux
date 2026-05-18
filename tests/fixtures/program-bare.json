@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "startDate": "2026-01-01",
+    "version": "bare-fixture-1",
+    "principles": [
+      "injury_prevention",
+      "mobility_every_phase",
+      "form_over_load",
+      "longevity_focus"
+    ],
+    "constraints": {
+      "mobility_required": true,
+      "min_mobility_days_per_week": 1
+    }
+  },
+  "phases": [
+    {
+      "id": "p1",
+      "name": "Phase 1: Bare",
+      "duration_weeks": 4,
+      "schedule_pattern": ["A", "Mobility", "B", "Rest", "A", "Mobility", "Rest"],
+      "workouts": {
+        "A": {
+          "name": "Workout A — Squat & Pull",
+          "focus": "lower",
+          "exercises": [
+            { "exercise_id": "warmup-band-pull-aparts", "sets": 1, "reps": "10", "rest": "30s" },
+            { "exercise_id": "goblet-squats", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 },
+            { "exercise_id": "kb-gorilla-rows", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 }
+          ]
+        },
+        "B": {
+          "name": "Workout B — Push & Carry",
+          "focus": "upper",
+          "exercises": [
+            { "exercise_id": "swedish-ladder-pushups", "sets": 3, "reps": "8-12", "rest": "60s" },
+            { "exercise_id": "trx-inverted-rows", "sets": 3, "reps": "8-12", "rest": "90s" }
+          ]
+        },
+        "Mobility": {
+          "name": "Mobility & Flow",
+          "focus": "mobility",
+          "exercises": [
+            { "exercise_id": "cat-cow-spinal-flow", "sets": 2, "reps": "10", "rest": "30s" },
+            { "exercise_id": "thread-the-needle", "sets": 2, "reps": "8 each side", "rest": "30s" }
+          ]
+        }
+      }
+    }
+  ]
+}

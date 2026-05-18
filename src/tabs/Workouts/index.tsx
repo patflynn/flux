@@ -18,9 +18,11 @@ import {
 } from './state';
 import {
   applyImportFromFile,
+  applyProgramImportFromFile,
   downloadExport,
   exportPayload,
   formatImportMessage,
+  formatProgramImportMessage,
 } from './logic/exportImport';
 import type { LogEntry, LogMap, Phase, Program, WorkoutState } from './types';
 import { ExerciseCard } from './components/ExerciseCard';
@@ -57,8 +59,10 @@ export function Workouts() {
     })();
   }, []);
 
-  function triggerImport() {
-    document.querySelector<HTMLInputElement>('[data-testid="import-input"]')?.click();
+  function triggerProgramImport() {
+    document
+      .querySelector<HTMLInputElement>('[data-testid="import-program-input"]')
+      ?.click();
   }
 
   const phase = getCurrentPhase(program, state);
@@ -179,6 +183,23 @@ export function Workouts() {
     }
   }
 
+  async function handleProgramImport(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    try {
+      const result = await applyProgramImportFromFile(file);
+      const p = await loadProgram();
+      setProgram(p);
+      setImportMessage(formatProgramImportMessage(result));
+    } catch (err) {
+      setImportMessage(
+        'Import failed: ' + (err instanceof Error ? err.message : 'unknown error'),
+      );
+    }
+  }
+
   async function handleReset() {
     if (!confirm('Reset all progress? This clears day count, exercise log, and loaded program.')) return;
     await clearAll();
@@ -231,7 +252,7 @@ export function Workouts() {
             <button
               type="button"
               class="rounded border border-flux-accent bg-flux-accent/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-flux-accent"
-              onClick={triggerImport}
+              onClick={triggerProgramImport}
               data-testid="import-program-btn"
             >
               Import program file
@@ -246,6 +267,13 @@ export function Workouts() {
               Generate with AI (coming soon)
             </button>
           </div>
+          <input
+            type="file"
+            accept="application/json,.json"
+            class="hidden"
+            onChange={handleProgramImport}
+            data-testid="import-program-input"
+          />
         </div>
       ) : workout ? (
         <>
@@ -337,8 +365,11 @@ export function Workouts() {
         >
           Export
         </button>
-        <label class="cursor-pointer rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary">
-          Import
+        <label
+          class="cursor-pointer rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
+          data-testid="import-backup-label"
+        >
+          Import Backup
           <input
             type="file"
             accept="application/json,.json"

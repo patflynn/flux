@@ -72,7 +72,16 @@ export function formatImportMessage(result: ImportResult): string {
   const head =
     `Imported ${result.imported} of ${result.total} ${noun}` +
     (result.skipped ? ` (${result.skipped} skipped)` : '');
-  if (!result.programApplied) return head;
+  if (!result.programApplied) {
+    // Backup imported but no program inside. Old-app exports don't carry a
+    // program — point the user at the per-tab importer.
+    if (result.imported > 0) {
+      return (
+        `${head}. You still need to load a program — use "Import Program File" on the Workouts tab.`
+      );
+    }
+    return head;
+  }
   const m = result.exerciseMapping;
   if (!m) return `${head}. Program loaded.`;
   if (m.unmapped === 0) {
@@ -80,6 +89,21 @@ export function formatImportMessage(result: ImportResult): string {
   }
   return (
     `${head}. Imported. ${m.mapped} of ${m.total} exercises map to the Flux catalog.` +
+    " Unmapped will still log correctly but won't show demos."
+  );
+}
+
+export interface ProgramImportResult {
+  exerciseMapping: { mapped: number; unmapped: number; total: number };
+}
+
+export function formatProgramImportMessage(result: ProgramImportResult): string {
+  const m = result.exerciseMapping;
+  if (m.unmapped === 0) {
+    return `Program loaded; ${m.mapped} of ${m.total} exercises map to the Flux catalog.`;
+  }
+  return (
+    `Program loaded. ${m.mapped} of ${m.total} exercises map to the Flux catalog.` +
     " Unmapped will still log correctly but won't show demos."
   );
 }
@@ -329,6 +353,40 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
+// Apply just a program to flux-db. Accepts either a bare program object
+// (`{meta, phases}`) or a backup envelope where it pulls the `program`
+// field out. Never touches the log or workout state stores. Throws on
+// shapes we can't make sense of — the empty-state CTA surfaces these
+// errors inline.
+export async function applyProgramImport(raw: unknown): Promise<ProgramImportResult> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error('Invalid program file: not an object');
+  }
+  const data = raw as Record<string, unknown>;
+
+  // Envelope sniffing: a backup envelope has log/state at the top level.
+  // If we see those without a program, the caller picked the wrong file
+  // for this button — point them at the backup importer.
+  const looksLikeEnvelope = 'log' in data || 'state' in data;
+  let candidate: unknown;
+  if ('program' in data) {
+    candidate = data.program;
+  } else if (looksLikeEnvelope) {
+    throw new Error(
+      'No program in this file. To restore a backup with log + state, use the Import Backup button in the toolbar.',
+    );
+  } else {
+    candidate = data;
+  }
+
+  const migrated = migrateProgram(candidate);
+  if (!migrated) {
+    throw new Error('Invalid program file: missing meta or phases');
+  }
+  await saveProgram(migrated.program);
+  return { exerciseMapping: migrated.stats };
+}
+
 // Convenience for tests: read a File and apply.
 export async function applyImportFromFile(
   file: File,
@@ -337,6 +395,14 @@ export async function applyImportFromFile(
   const text = await file.text();
   const parsed: unknown = JSON.parse(text);
   return applyImport(parsed, opts);
+}
+
+export async function applyProgramImportFromFile(
+  file: File,
+): Promise<ProgramImportResult> {
+  const text = await file.text();
+  const parsed: unknown = JSON.parse(text);
+  return applyProgramImport(parsed);
 }
 
 export type { LogMap, Program };
