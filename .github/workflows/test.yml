@@ -64,8 +64,8 @@ jobs:
       - name: Build production bundle
         run: nix develop --command bash -c "npm ci && npm run build"
 
-  program-principles:
-    name: Program Principles
+  catalog-validation:
+    name: Catalog Validation
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -80,8 +80,8 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@1828eb4e5414b8dfe36daae53ea3e4b8c3fdec7a # main
 
-      - name: Validate program data and principles
-        run: nix develop --command bash -c "npm ci && npm run validate-program"
+      - name: Validate exercise catalog
+        run: nix develop --command bash -c "npm ci && npm run validate-catalog"
 
   e2e:
     name: E2E Tests
