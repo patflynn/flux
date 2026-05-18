@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
-    "test": "playwright test"
+    "test": "playwright test",
+    "validate-program": "tsx scripts/validate-program.ts"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
@@ -25,6 +26,7 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.22.1",
     "typescript": "^5.7.2",
     "vite": "^5.4.11"
   }

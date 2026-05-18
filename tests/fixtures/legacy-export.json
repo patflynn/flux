@@ -1,0 +1,40 @@
+{
+  "log": {
+    "1_0": {
+      "exercise": "Warmup: Band Pull-Aparts",
+      "completed": true,
+      "day": 1,
+      "timestamp": 1738000000000,
+      "difficulty": "good"
+    },
+    "1_3": {
+      "exercise": "KB Gorilla Rows",
+      "weight": 25,
+      "difficulty": "good",
+      "completed": true,
+      "day": 1,
+      "timestamp": 1738000100000
+    },
+    "1_4": {
+      "exercise": "Kettlebell Swings",
+      "weight": 30,
+      "difficulty": "hard",
+      "notes": "Felt heavy on last set.",
+      "completed": true,
+      "day": 1,
+      "timestamp": 1738000200000
+    },
+    "8_3": {
+      "exercise": "KB Gorilla Rows",
+      "weight": 30,
+      "difficulty": "good",
+      "completed": true,
+      "day": 8,
+      "timestamp": 1738604800000
+    }
+  },
+  "state": {
+    "globalDay": 8,
+    "currentPhase": "p1"
+  }
+}
