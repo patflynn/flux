@@ -1,10 +1,10 @@
-import type { Exercise, LogEntry } from '../types';
+import type { LogEntry, ResolvedExercise } from '../types';
 import { MAX_WEIGHT, MIN_WEIGHT, parseReps } from '../logic/progression';
 import { parseSeconds } from '../logic/timer';
 import { Timer } from './Timer';
 
 interface Props {
-  exercise: Exercise;
+  exercise: ResolvedExercise;
   index: number;
   globalDay: number;
   entry: LogEntry | undefined;
@@ -29,7 +29,7 @@ export function ExerciseCard({
   const difficulty = entry?.difficulty;
   const notes = entry?.notes ?? '';
   const weight = entry?.weight;
-  const increment = exercise.weight_increment ?? 5;
+  const increment = exercise.weightIncrement ?? 5;
   const maxSets = exercise.sets;
   const maxReps = parseReps(exercise.reps);
   const failedSet = entry?.failedSet ?? 1;
@@ -116,14 +116,25 @@ export function ExerciseCard({
       data-completed={completed ? 'true' : 'false'}
     >
       <header class="flex items-start justify-between gap-2">
-        <h3 class="text-base font-semibold leading-tight text-flux-text-primary">
-          {exercise.name}
-        </h3>
-        {exercise.video_id ? (
+        <div class="flex flex-1 flex-wrap items-center gap-2">
+          <h3 class="text-base font-semibold leading-tight text-flux-text-primary">
+            {exercise.name}
+          </h3>
+          {exercise.unmapped && (
+            <span
+              class="rounded border border-flux-border bg-flux-soft px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-flux-text-tertiary"
+              data-testid={`unmapped-${index}`}
+              title="Imported from a legacy export. No demo or technique notes available."
+            >
+              Unmapped
+            </span>
+          )}
+        </div>
+        {exercise.demoVideoId ? (
           <button
             type="button"
             class="shrink-0 rounded border border-flux-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
-            onClick={() => onPlayVideo(exercise.video_id!, exercise.video_start)}
+            onClick={() => onPlayVideo(exercise.demoVideoId!, exercise.demoVideoStart)}
             data-testid={`video-${index}`}
           >
             Video
@@ -141,8 +152,8 @@ export function ExerciseCard({
         <span><strong class="text-flux-text-primary">{exercise.rest}</strong> rest</span>
       </div>
 
-      {exercise.note && (
-        <p class="mt-2 text-xs leading-snug text-flux-text-tertiary">{exercise.note}</p>
+      {exercise.techniqueNote && (
+        <p class="mt-2 text-xs leading-snug text-flux-text-tertiary">{exercise.techniqueNote}</p>
       )}
 
       {(repSeconds || restSeconds) && (
@@ -156,7 +167,7 @@ export function ExerciseCard({
         </div>
       )}
 
-      {exercise.uses_weight && (
+      {exercise.usesWeight && (
         <div class="mt-3 flex items-center gap-2">
           <span class="text-xs uppercase tracking-wider text-flux-text-tertiary">Weight</span>
           <button

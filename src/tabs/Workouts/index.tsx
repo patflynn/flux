@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
-import { program } from './data/program';
 import {
   workoutKeyForDay,
   suggestWeight,
   getLastWeight,
   buildLatestWeightedMap,
 } from './logic/progression';
+import { resolveExercise } from './logic/resolveExercise';
 import {
   DEFAULT_STATE,
   clearAll,
@@ -20,11 +20,12 @@ import {
   downloadExport,
   exportPayload,
 } from './logic/exportImport';
-import type { LogEntry, LogMap, Phase, WorkoutState } from './types';
+import type { LogEntry, LogMap, Phase, Program, WorkoutState } from './types';
 import { ExerciseCard } from './components/ExerciseCard';
 import { VideoModal } from './components/VideoModal';
 
-function getCurrentPhase(state: WorkoutState): Phase | null {
+function getCurrentPhase(program: Program | null, state: WorkoutState): Phase | null {
+  if (!program) return null;
   return program.phases.find((p) => p.id === state.currentPhase) ?? null;
 }
 
@@ -39,6 +40,9 @@ export function Workouts() {
   const [video, setVideo] = useState<VideoState | null>(null);
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  // Programs are runtime data; they arrive via import or (future) AI
+  // generation. Step 4 wires this up to flux-db.
+  const [program] = useState<Program | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -49,18 +53,23 @@ export function Workouts() {
     })();
   }, []);
 
-  const phase = getCurrentPhase(state);
+  const phase = getCurrentPhase(program, state);
   const workoutKey = phase ? workoutKeyForDay(phase, state.globalDay) : null;
   const workout = phase && workoutKey && workoutKey !== 'Rest' ? phase.workouts[workoutKey] : null;
   const week = Math.floor((state.globalDay - 1) / 7) + 1;
 
+  const resolvedExercises = useMemo(
+    () => workout?.exercises.map(resolveExercise) ?? [],
+    [workout],
+  );
+
   const completedCount = useMemo(() => {
     if (!workout) return 0;
-    return workout.exercises.reduce((count, _ex, i) => {
+    return resolvedExercises.reduce((count, _ex, i) => {
       const key = `${state.globalDay}_${i}`;
       return count + (log[key]?.completed ? 1 : 0);
     }, 0);
-  }, [log, state.globalDay, workout]);
+  }, [log, state.globalDay, workout, resolvedExercises]);
 
   // Compute latest-weighted-entry-per-exercise once per log change so render
   // is O(M) instead of O(M*N) (scanning the full log for every exercise).
@@ -71,7 +80,6 @@ export function Workouts() {
       const existing = log[key];
       const merged: Partial<LogEntry> = { ...existing, ...partial };
 
-      // Strip explicit-undefined fields so they don't persist as `null`.
       for (const k of Object.keys(merged) as (keyof LogEntry)[]) {
         if (merged[k] === undefined) delete merged[k];
       }
@@ -109,7 +117,7 @@ export function Workouts() {
     if (state.globalDay >= 365) return;
     let nextPhaseId = state.currentPhase;
     const day = state.globalDay + 1;
-    if (phase) {
+    if (phase && program) {
       const daysInPhase = phase.duration_weeks * 7;
       if (day > daysInPhase) {
         const idx = program.phases.findIndex((p) => p.id === phase.id);
@@ -127,7 +135,7 @@ export function Workouts() {
     if (state.globalDay <= 1) return;
     const day = state.globalDay - 1;
     let nextPhaseId = state.currentPhase;
-    if (phase) {
+    if (phase && program) {
       const idx = program.phases.findIndex((p) => p.id === phase.id);
       if (idx > 0) {
         const prev = program.phases[idx - 1];
@@ -180,7 +188,7 @@ export function Workouts() {
     );
   }
 
-  const totalExercises = workout?.exercises.length ?? 0;
+  const totalExercises = resolvedExercises.length;
   const progressPercent = totalExercises > 0 ? (completedCount / totalExercises) * 100 : 0;
 
   return (
@@ -203,7 +211,17 @@ export function Workouts() {
         </div>
       </header>
 
-      {workout ? (
+      {!program ? (
+        <div
+          class="rounded-lg border border-flux-border bg-flux-card p-6 text-center"
+          data-testid="no-program"
+        >
+          <h2 class="text-lg font-semibold text-flux-text-primary">No program loaded</h2>
+          <p class="mt-1 text-sm text-flux-text-secondary">
+            Import a program file to get started, or wait for AI-generated programs.
+          </p>
+        </div>
+      ) : workout ? (
         <>
           <div
             class="overflow-hidden rounded-lg border border-flux-border bg-flux-card"
@@ -227,14 +245,14 @@ export function Workouts() {
           </div>
 
           <div class="space-y-3" data-testid="exercises-list">
-            {workout.exercises.map((ex, i) => {
+            {resolvedExercises.map((ex, i) => {
               const key = `${state.globalDay}_${i}`;
               const last = latestWeights.get(ex.name) ?? null;
-              const suggested = ex.uses_weight
+              const suggested = ex.usesWeight
                 ? suggestWeight(
                     last,
-                    ex.starting_weight,
-                    ex.weight_increment ?? 5,
+                    ex.startingWeight,
+                    ex.weightIncrement ?? 5,
                     state.globalDay,
                   )
                 : null;
@@ -246,7 +264,7 @@ export function Workouts() {
                   globalDay={state.globalDay}
                   entry={log[key]}
                   suggestedWeight={suggested}
-                  lastWeight={ex.uses_weight ? null : getLastWeight(last)}
+                  lastWeight={ex.usesWeight ? null : getLastWeight(last)}
                   onLog={onLog}
                   onPlayVideo={(videoId, start) => setVideo({ videoId, start })}
                 />
