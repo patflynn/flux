@@ -5,9 +5,8 @@
 export interface Exercise {
   id: string;
   name: string;
-  // The muscle groups primarily worked. Empty means we don't have the data yet.
-  // TODO: backfill muscleGroups for catalog entries that omit them.
-  muscleGroups?: string[];
+  // Muscle groups primarily worked. Required; validated by scripts/validate-catalog.ts.
+  muscleGroups: string[];
   // TODO: backfill equipment requirements (e.g., 'kettlebell', 'barbell', 'bodyweight').
   equipment?: string[];
   // YouTube video id for a technique demo, if available.

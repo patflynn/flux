@@ -9,6 +9,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'warmup-band-pull-aparts': {
     id: 'warmup-band-pull-aparts',
     name: 'Warmup: Band Pull-Aparts',
+    muscleGroups: ['shoulders', 'upper-back'],
     demoVideoId: 'MnDpmNYUjbc',
     techniqueNote: 'Light band. Squeeze shoulder blades together at end range.',
     usesWeight: false,
@@ -16,6 +17,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'warmup-hip-circles': {
     id: 'warmup-hip-circles',
     name: 'Warmup: Hip Circles',
+    muscleGroups: ['hips'],
     demoVideoId: 'altA7815AGs',
     demoVideoStart: 9,
     techniqueNote: 'Controlled circles, both directions. Open up the hip capsule.',
@@ -24,6 +26,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'swedish-ladder-dead-hang': {
     id: 'swedish-ladder-dead-hang',
     name: 'Swedish Ladder Dead Hang',
+    muscleGroups: ['grip', 'shoulders', 'lats'],
     demoVideoId: 'iayQ-AeOpvE',
     demoVideoStart: 7,
     techniqueNote: 'Engage scaps, do not just hang loose.',
@@ -32,6 +35,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'kb-gorilla-rows': {
     id: 'kb-gorilla-rows',
     name: 'KB Gorilla Rows',
+    muscleGroups: ['back', 'biceps'],
     demoVideoId: 'Z44y6AgV-TI',
     techniqueNote:
       'Keep lower back flat. Use the 10lb DB if KB is too heavy initially.',
@@ -42,6 +46,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'kettlebell-swings': {
     id: 'kettlebell-swings',
     name: 'Kettlebell Swings',
+    muscleGroups: ['glutes', 'hamstrings', 'posterior-chain'],
     demoVideoId: '1cVT3ee9mgU',
     demoVideoStart: 9,
     techniqueNote: 'Hinge only. Squeeze glutes at top. No lower back rounding.',
@@ -52,6 +57,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'trx-inverted-rows': {
     id: 'trx-inverted-rows',
     name: 'TRX Inverted Rows',
+    muscleGroups: ['back', 'biceps'],
     demoVideoId: 'ypIQZWKMbkU',
     demoVideoStart: 13,
     techniqueNote:
@@ -61,6 +67,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'warmup-worlds-greatest-stretch': {
     id: 'warmup-worlds-greatest-stretch',
     name: "Warmup: World's Greatest Stretch",
+    muscleGroups: ['hips', 'thoracic-spine', 'shoulders'],
     demoVideoId: 'u3M3F8ScJsE',
     techniqueNote:
       'Lunge, rotate, reach. Opens hips, T-spine, and shoulders in one flow.',
@@ -69,6 +76,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'goblet-squats': {
     id: 'goblet-squats',
     name: 'Goblet Squats',
+    muscleGroups: ['quads', 'glutes'],
     demoVideoId: 'tToWat96Rhk',
     techniqueNote: 'Elbows inside knees at bottom.',
     usesWeight: true,
@@ -78,6 +86,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'swedish-ladder-pushups': {
     id: 'swedish-ladder-pushups',
     name: 'Swedish Ladder Pushups',
+    muscleGroups: ['chest', 'shoulders', 'triceps'],
     demoVideoId: 'GcSyCL4qpNI',
     techniqueNote: 'Slow eccentric (3 seconds down).',
     usesWeight: false,
@@ -85,6 +94,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'hanging-knee-raises': {
     id: 'hanging-knee-raises',
     name: 'Hanging Knee Raises',
+    muscleGroups: ['abs', 'hip-flexors'],
     demoVideoId: 'l7OroezzX9k',
     techniqueNote: "Back against the ladder. Don't swing.",
     usesWeight: false,
@@ -92,12 +102,14 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'peloton-hiit-tabata': {
     id: 'peloton-hiit-tabata',
     name: 'Peloton HIIT Tabata',
+    muscleGroups: ['cardio', 'full-body'],
     techniqueNote: "Select a 'Tabata' or 'HIIT' class from the library.",
     usesWeight: false,
   },
   '90-90-hip-switch': {
     id: '90-90-hip-switch',
     name: '90/90 Hip Switch',
+    muscleGroups: ['hips'],
     demoVideoId: 'bJII__gcUHA',
     techniqueNote: 'Loosen up the hips for squats.',
     usesWeight: false,
@@ -105,6 +117,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'cat-cow-spinal-flow': {
     id: 'cat-cow-spinal-flow',
     name: 'Cat/Cow Spinal Flow',
+    muscleGroups: ['spine', 'core'],
     demoVideoId: 'Xq3nUS-Y2q4',
     techniqueNote: 'Focus on segmental movement.',
     usesWeight: false,
@@ -112,6 +125,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'thread-the-needle': {
     id: 'thread-the-needle',
     name: 'Thread the Needle',
+    muscleGroups: ['thoracic-spine', 'shoulders'],
     demoVideoId: 'ljEdoRyuPpg',
     techniqueNote:
       'Thoracic rotation. Reach through, then open to ceiling. Keep hips stacked.',
@@ -120,6 +134,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'wall-slides': {
     id: 'wall-slides',
     name: 'Wall Slides',
+    muscleGroups: ['shoulders', 'upper-back'],
     demoVideoId: 'gYVohh1dHHQ',
     techniqueNote:
       'Keep lower back and wrists flat against wall. Targets shoulder mobility and scapular control.',
@@ -128,6 +143,7 @@ export const EXERCISE_CATALOG: ExerciseCatalog = {
   'peloton-power-zone-endurance': {
     id: 'peloton-power-zone-endurance',
     name: 'Peloton Power Zone Endurance',
+    muscleGroups: ['cardio', 'legs'],
     techniqueNote: 'Zone 2/3 focus. Sweat but able to talk.',
     usesWeight: false,
   },

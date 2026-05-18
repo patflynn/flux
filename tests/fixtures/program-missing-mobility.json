@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "startDate": "2026-01-01",
+    "version": "missing-mobility-1",
+    "principles": [
+      "injury_prevention",
+      "mobility_every_phase",
+      "form_over_load",
+      "longevity_focus"
+    ],
+    "constraints": {
+      "mobility_required": true,
+      "min_mobility_days_per_week": 1
+    }
+  },
+  "phases": [
+    {
+      "id": "p1",
+      "name": "Phase 1: Power Only",
+      "duration_weeks": 4,
+      "schedule_pattern": ["A", "B", "Rest", "A", "B", "Rest", "Rest"],
+      "workouts": {
+        "A": {
+          "name": "Workout A — Push",
+          "focus": "push",
+          "exercises": [
+            { "exercise_id": "swedish-ladder-pushups", "sets": 3, "reps": "8-12", "rest": "60s" }
+          ]
+        },
+        "B": {
+          "name": "Workout B — Pull",
+          "focus": "pull",
+          "exercises": [
+            { "exercise_id": "trx-inverted-rows", "sets": 3, "reps": "8-12", "rest": "90s" }
+          ]
+        }
+      }
+    }
+  ]
+}

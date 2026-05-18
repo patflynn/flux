@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test": "playwright test",
-    "validate-program": "tsx scripts/validate-program.ts"
+    "validate-catalog": "tsx scripts/validate-catalog.ts"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",

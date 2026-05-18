@@ -1,10 +1,10 @@
-// Program-data validators. Ported from the old tests/validate.js — the
-// principles enforcement is load-bearing for the workout app's safety
-// philosophy (mobility-first, injury-prevention, longevity-focus). These
-// run in CI via scripts/validate-program.ts and refuse to merge program
-// data that drops any of the required principles or mobility coverage.
+// Program-data validators. Cross-checks every workout exercise reference
+// against the source-of-truth exercise catalog so a program cannot ship with
+// unknown exercise_ids. Mobility / principles enforcement remains load-bearing
+// for the workout app's safety philosophy (mobility-first, injury-prevention).
 
 import type { Program } from '../tabs/Workouts/types';
+import type { ExerciseCatalog } from '../data/types';
 
 export interface Finding {
   path: string;
@@ -29,7 +29,10 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-export function validateProgramSchema(p: unknown): ValidationResult {
+export function validateProgramSchema(
+  p: unknown,
+  catalog: ExerciseCatalog,
+): ValidationResult {
   const errors: Finding[] = [];
 
   if (!isObject(p)) {
@@ -106,8 +109,16 @@ export function validateProgramSchema(p: unknown): ValidationResult {
             errors.push({ path: exPath, message: 'must be an object' });
             return;
           }
-          if (typeof ex.name !== 'string') {
-            errors.push({ path: `${exPath}.name`, message: 'missing name' });
+          if (typeof ex.exercise_id !== 'string') {
+            errors.push({
+              path: `${exPath}.exercise_id`,
+              message: 'must be a string',
+            });
+          } else if (!catalog[ex.exercise_id] && ex.from_legacy_import !== true) {
+            errors.push({
+              path: `${exPath}.exercise_id`,
+              message: `unknown exercise_id "${ex.exercise_id}" not present in catalog`,
+            });
           }
           if (typeof ex.sets !== 'number') {
             errors.push({ path: `${exPath}.sets`, message: 'must be a number' });
@@ -199,8 +210,11 @@ export function validatePrinciples(p: unknown): ValidationResult {
   return { ok: errors.length === 0, errors };
 }
 
-export function validateProgram(p: Program): ValidationResult {
-  const s = validateProgramSchema(p);
+export function validateProgram(
+  p: Program,
+  catalog: ExerciseCatalog,
+): ValidationResult {
+  const s = validateProgramSchema(p, catalog);
   const pr = validatePrinciples(p);
   return { ok: s.ok && pr.ok, errors: [...s.errors, ...pr.errors] };
 }
