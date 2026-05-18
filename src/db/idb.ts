@@ -62,6 +62,22 @@ export async function dbPut(
   return result;
 }
 
+// Bulk put: all writes share a single readwrite transaction so bulk imports
+// don't pay per-entry transaction overhead.
+export async function dbPutMany(
+  db: IDBDatabase,
+  store: string,
+  entries: Array<{ key?: IDBValidKey; value: unknown }>,
+): Promise<void> {
+  if (entries.length === 0) return;
+  const tx = db.transaction(store, 'readwrite');
+  const objectStore = tx.objectStore(store);
+  for (const { key, value } of entries) {
+    objectStore.put(value, key);
+  }
+  await txDone(tx);
+}
+
 export async function dbDelete(
   db: IDBDatabase,
   store: string,

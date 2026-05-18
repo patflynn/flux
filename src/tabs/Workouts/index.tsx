@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { program } from './data/program';
-import { workoutKeyForDay, suggestWeight, getLastWeight } from './logic/progression';
+import {
+  workoutKeyForDay,
+  suggestWeight,
+  getLastWeight,
+  buildLatestWeightedMap,
+} from './logic/progression';
 import {
   DEFAULT_STATE,
   clearAll,
@@ -57,42 +62,47 @@ export function Workouts() {
     }, 0);
   }, [log, state.globalDay, workout]);
 
+  // Compute latest-weighted-entry-per-exercise once per log change so render
+  // is O(M) instead of O(M*N) (scanning the full log for every exercise).
+  const latestWeights = useMemo(() => buildLatestWeightedMap(log), [log]);
+
   const onLog = useCallback(
     (key: string, partial: Partial<LogEntry>, options?: { remove?: boolean }) => {
-      setLog((prev) => {
-        const next = { ...prev };
-        const existing = next[key];
-        const merged: Partial<LogEntry> = { ...existing, ...partial };
+      const existing = log[key];
+      const merged: Partial<LogEntry> = { ...existing, ...partial };
 
-        // Strip explicit-undefined fields so they don't persist as `null`.
-        for (const k of Object.keys(merged) as (keyof LogEntry)[]) {
-          if (merged[k] === undefined) delete merged[k];
-        }
+      // Strip explicit-undefined fields so they don't persist as `null`.
+      for (const k of Object.keys(merged) as (keyof LogEntry)[]) {
+        if (merged[k] === undefined) delete merged[k];
+      }
 
-        const meaningless =
-          options?.remove ||
-          (!merged.weight &&
-            !merged.difficulty &&
-            !merged.notes &&
-            !merged.completed);
+      const meaningless =
+        options?.remove ||
+        (!merged.weight &&
+          !merged.difficulty &&
+          !merged.notes &&
+          !merged.completed);
 
-        if (meaningless && !merged.completed && !merged.weight && !merged.difficulty && !merged.notes) {
+      if (meaningless) {
+        setLog((prev) => {
+          if (!(key in prev)) return prev;
+          const next = { ...prev };
           delete next[key];
-          deleteLogEntry(key).catch(() => {});
-        } else {
-          const entry: LogEntry = {
-            exercise: merged.exercise ?? existing?.exercise ?? '',
-            day: merged.day ?? existing?.day ?? state.globalDay,
-            timestamp: merged.timestamp ?? Date.now(),
-            ...merged,
-          };
-          next[key] = entry;
-          putLogEntry(key, entry).catch(() => {});
-        }
-        return next;
-      });
+          return next;
+        });
+        deleteLogEntry(key).catch(() => {});
+      } else {
+        const entry: LogEntry = {
+          exercise: merged.exercise ?? existing?.exercise ?? '',
+          day: merged.day ?? existing?.day ?? state.globalDay,
+          timestamp: merged.timestamp ?? Date.now(),
+          ...merged,
+        };
+        setLog((prev) => ({ ...prev, [key]: entry }));
+        putLogEntry(key, entry).catch(() => {});
+      }
     },
-    [state.globalDay],
+    [log, state.globalDay],
   );
 
   function nextDay() {
@@ -219,10 +229,10 @@ export function Workouts() {
           <div class="space-y-3" data-testid="exercises-list">
             {workout.exercises.map((ex, i) => {
               const key = `${state.globalDay}_${i}`;
+              const last = latestWeights.get(ex.name) ?? null;
               const suggested = ex.uses_weight
                 ? suggestWeight(
-                    log,
-                    ex.name,
+                    last,
                     ex.starting_weight,
                     ex.weight_increment ?? 5,
                     state.globalDay,
@@ -236,7 +246,7 @@ export function Workouts() {
                   globalDay={state.globalDay}
                   entry={log[key]}
                   suggestedWeight={suggested}
-                  lastWeight={ex.uses_weight ? null : getLastWeight(log, ex.name)}
+                  lastWeight={ex.uses_weight ? null : getLastWeight(last)}
                   onLog={onLog}
                   onPlayVideo={(videoId, start) => setVideo({ videoId, start })}
                 />

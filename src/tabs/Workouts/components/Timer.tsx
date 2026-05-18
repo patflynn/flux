@@ -17,16 +17,12 @@ export function Timer({ label, seconds, testId }: Props) {
     setRemaining(seconds);
     setRunning(false);
     setFinished(false);
-    return clearInterval();
-
-    function clearInterval() {
-      return () => {
-        if (intervalRef.current != null) {
-          window.clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      };
-    }
+    return () => {
+      if (intervalRef.current != null) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [seconds]);
 
   useEffect(() => {

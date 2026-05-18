@@ -16,33 +16,30 @@ function isValidWeight(w: unknown): w is number {
   return typeof w === 'number' && Number.isFinite(w);
 }
 
-// Find the most recent log entry with a numeric weight for a given exercise.
-function lastWeightedEntry(
-  log: LogMap,
-  exerciseName: string,
-): LogEntry | null {
-  let best: LogEntry | null = null;
+// Build a Map of exercise → most-recent weighted log entry in a single O(N)
+// pass. Callers (e.g., the Workouts render) memoize this per-log and look
+// each exercise up in O(1), avoiding the previous O(M*N) render cost.
+export function buildLatestWeightedMap(log: LogMap): Map<string, LogEntry> {
+  const map = new Map<string, LogEntry>();
   for (const entry of Object.values(log)) {
-    if (entry.exercise === exerciseName && isValidWeight(entry.weight)) {
-      if (!best || (entry.timestamp ?? 0) > (best.timestamp ?? 0)) {
-        best = entry;
-      }
+    if (!isValidWeight(entry.weight)) continue;
+    const current = map.get(entry.exercise);
+    if (!current || (entry.timestamp ?? 0) > (current.timestamp ?? 0)) {
+      map.set(entry.exercise, entry);
     }
   }
-  return best;
+  return map;
 }
 
-// Suggest the next weight for an exercise: increment from last logged weight
-// when crossing a week boundary, otherwise hold last week's weight. Caps at
-// MAX_WEIGHT — this preserves the old app's safety-first progression.
+// Suggest the next weight given the last weighted entry: increment when
+// crossing a week boundary, otherwise hold. Caps at MAX_WEIGHT — this
+// preserves the old app's safety-first progression.
 export function suggestWeight(
-  log: LogMap,
-  exerciseName: string,
+  last: LogEntry | null | undefined,
   startingWeight: number | undefined,
   increment: number,
   currentDay: number,
 ): number {
-  const last = lastWeightedEntry(log, exerciseName);
   if (!last || !isValidWeight(last.weight)) {
     return startingWeight ?? MIN_WEIGHT;
   }
@@ -54,8 +51,7 @@ export function suggestWeight(
   return last.weight;
 }
 
-export function getLastWeight(log: LogMap, exerciseName: string): number | null {
-  const last = lastWeightedEntry(log, exerciseName);
+export function getLastWeight(last: LogEntry | null | undefined): number | null {
   return last && isValidWeight(last.weight) ? last.weight : null;
 }
 

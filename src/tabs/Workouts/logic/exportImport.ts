@@ -6,7 +6,7 @@
 import {
   loadLog,
   loadState,
-  putLogEntry,
+  putLogEntries,
   saveState,
   sanitizeLogEntry,
 } from '../state';
@@ -62,6 +62,7 @@ export async function applyImport(
 
   let imported = 0;
   let skipped = 0;
+  const toWrite: Array<{ key: string; entry: LogEntry }> = [];
   for (const key of keys) {
     if (existing[key]) {
       skipped++;
@@ -78,9 +79,12 @@ export async function applyImport(
       timestamp: sanitized.timestamp ?? Date.now(),
       ...sanitized,
     };
-    await putLogEntry(key, entry);
+    toWrite.push({ key, entry });
     imported++;
   }
+  // Single readwrite transaction for the whole batch — avoids per-entry
+  // transaction overhead on bulk imports.
+  await putLogEntries(toWrite);
 
   let stateApplied = false;
   if (opts.applyState && isObject(data.state)) {

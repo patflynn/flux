@@ -1,4 +1,4 @@
-import { openDb, dbGet, dbPut, dbDelete, dbClear, dbGetAll } from '../../db/idb';
+import { openDb, dbGet, dbPut, dbPutMany, dbDelete, dbClear, dbGetAll } from '../../db/idb';
 import type { LogEntry, LogMap, WorkoutState } from './types';
 
 const DB_NAME = 'flux-db';
@@ -64,6 +64,17 @@ export async function loadLog(): Promise<LogMap> {
 export async function putLogEntry(key: string, entry: LogEntry): Promise<void> {
   const db = await getDb();
   await dbPut(db, LOG_STORE, entry, key);
+}
+
+export async function putLogEntries(
+  entries: Array<{ key: string; entry: LogEntry }>,
+): Promise<void> {
+  const db = await getDb();
+  await dbPutMany(
+    db,
+    LOG_STORE,
+    entries.map(({ key, entry }) => ({ key, value: entry })),
+  );
 }
 
 export async function deleteLogEntry(key: string): Promise<void> {
