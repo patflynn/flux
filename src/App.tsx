@@ -39,7 +39,7 @@ export function App({ entry }: { entry: EntryTab }) {
   }, []);
 
   return (
-    <div class="flex h-full flex-col bg-neutral-950 text-neutral-100">
+    <div class="flex h-full flex-col bg-flux-bg text-flux-text-primary">
       <main class="flex-1 overflow-y-auto p-4" data-active-tab={active}>
         {active === 'workouts' && <Workouts />}
         {active === 'meditate' && <Meditate />}
@@ -48,7 +48,7 @@ export function App({ entry }: { entry: EntryTab }) {
       </main>
 
       <nav
-        class="grid grid-cols-4 border-t border-neutral-800 bg-neutral-900"
+        class="grid grid-cols-4 border-t border-flux-border bg-flux-card"
         role="tablist"
         aria-label="Primary"
       >
@@ -65,8 +65,8 @@ export function App({ entry }: { entry: EntryTab }) {
               class={
                 'py-3 text-sm font-medium transition-colors ' +
                 (selected
-                  ? 'text-white bg-neutral-800'
-                  : 'text-neutral-400 hover:text-neutral-200')
+                  ? 'bg-flux-soft text-flux-text-primary'
+                  : 'text-flux-text-tertiary hover:text-flux-text-secondary')
               }
             >
               {t.label}

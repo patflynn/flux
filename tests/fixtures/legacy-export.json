@@ -1,0 +1,101 @@
+{
+  "log": {
+    "1_0": {
+      "exercise": "Warmup: Band Pull-Aparts",
+      "completed": true,
+      "day": 1,
+      "timestamp": 1738000000000,
+      "difficulty": "good"
+    },
+    "1_3": {
+      "exercise": "KB Gorilla Rows",
+      "weight": 25,
+      "difficulty": "good",
+      "completed": true,
+      "day": 1,
+      "timestamp": 1738000100000
+    },
+    "1_4": {
+      "exercise": "Kettlebell Swings",
+      "weight": 30,
+      "difficulty": "hard",
+      "notes": "Felt heavy on last set.",
+      "completed": true,
+      "day": 1,
+      "timestamp": 1738000200000
+    },
+    "8_3": {
+      "exercise": "KB Gorilla Rows",
+      "weight": 30,
+      "difficulty": "good",
+      "completed": true,
+      "day": 8,
+      "timestamp": 1738604800000
+    }
+  },
+  "state": {
+    "globalDay": 8,
+    "currentPhase": "p1"
+  },
+  "program": {
+    "meta": {
+      "startDate": "2025-01-01",
+      "version": "legacy-1",
+      "principles": [
+        "injury_prevention",
+        "mobility_every_phase",
+        "form_over_load",
+        "longevity_focus"
+      ],
+      "constraints": {
+        "mobility_required": true,
+        "min_mobility_days_per_week": 1
+      }
+    },
+    "phases": [
+      {
+        "id": "p1",
+        "name": "Phase 1: Structural Integrity",
+        "duration_weeks": 4,
+        "schedule_pattern": ["A", "B", "Mobility", "A", "B", "Mobility", "Rest"],
+        "workouts": {
+          "A": {
+            "name": "Workout A — Push & Hinge",
+            "focus": "push",
+            "exercises": [
+              { "name": "Warmup: Band Pull-Aparts", "sets": 1, "reps": "10", "rest": "30s" },
+              { "name": "Warmup: Hip Circles", "sets": 1, "reps": "10", "rest": "30s" },
+              { "name": "Goblet Squats", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 },
+              { "name": "KB Gorilla Rows", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 },
+              { "name": "Kettlebell Swings", "sets": 3, "reps": "12-15", "rest": "60s", "starting_weight": 25, "weight_increment": 5 },
+              { "name": "Swedish Ladder Pushups", "sets": 3, "reps": "8-12", "rest": "60s" },
+              { "name": "Hanging Knee Raises", "sets": 3, "reps": "8-12", "rest": "60s" }
+            ]
+          },
+          "B": {
+            "name": "Workout B — Pull & Carry",
+            "focus": "pull",
+            "exercises": [
+              { "name": "Warmup: Band Pull-Aparts", "sets": 1, "reps": "10", "rest": "30s" },
+              { "name": "Warmup: World's Greatest Stretch", "sets": 1, "reps": "5 each side", "rest": "30s" },
+              { "name": "TRX Inverted Rows", "sets": 3, "reps": "8-12", "rest": "90s" },
+              { "name": "Swedish Ladder Dead Hang", "sets": 3, "reps": "20-30s", "rest": "60s" },
+              { "name": "Goblet Squats", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 }
+            ]
+          },
+          "Mobility": {
+            "name": "Mobility & Flow",
+            "focus": "mobility",
+            "exercises": [
+              { "name": "Warmup: World's Greatest Stretch", "sets": 2, "reps": "5 each side", "rest": "30s" },
+              { "name": "90/90 Hip Switch", "sets": 2, "reps": "10 each side", "rest": "30s" },
+              { "name": "Cat/Cow Spinal Flow", "sets": 2, "reps": "10", "rest": "30s" },
+              { "name": "Thread the Needle", "sets": 2, "reps": "8 each side", "rest": "30s" },
+              { "name": "Wall Slides", "sets": 2, "reps": "10", "rest": "30s" }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

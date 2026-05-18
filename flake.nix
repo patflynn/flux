@@ -71,7 +71,7 @@
             # Run `prefetch-npm-deps package-lock.json` to refresh after
             # dependency changes. Lockfile-derived hash; updates when the
             # lockfile changes.
-            npmDepsHash = "sha256-fUhyKOMkITX+xxb0wONkkXjFLzLzCoi4IxR7X7C1d88=";
+            npmDepsHash = "sha256-tUu8eZlrVL+sABAW5mddztGoz80GzCDNA1vCSptOZaE=";
 
             # Capacitor's optional Android peer dep tries to run a gradle task
             # in postinstall; skip it since we only ship the web bundle here.

@@ -64,6 +64,25 @@ jobs:
       - name: Build production bundle
         run: nix develop --command bash -c "npm ci && npm run build"
 
+  catalog-validation:
+    name: Catalog Validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@430608d219b9321ec0c98eb6c37245a39aa6756e # main
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@1828eb4e5414b8dfe36daae53ea3e4b8c3fdec7a # main
+
+      - name: Validate exercise catalog
+        run: nix develop --command bash -c "npm ci && npm run validate-catalog"
+
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest

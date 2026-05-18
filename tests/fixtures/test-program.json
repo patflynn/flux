@@ -1,0 +1,64 @@
+{
+  "log": {},
+  "program": {
+    "meta": {
+      "startDate": "2025-01-01",
+      "version": "test-1",
+      "principles": [
+        "injury_prevention",
+        "mobility_every_phase",
+        "form_over_load",
+        "longevity_focus"
+      ],
+      "constraints": {
+        "mobility_required": true,
+        "min_mobility_days_per_week": 1
+      }
+    },
+    "phases": [
+      {
+        "id": "p1",
+        "name": "Phase 1: Structural Integrity",
+        "duration_weeks": 4,
+        "schedule_pattern": ["A", "B", "Mobility", "A", "B", "Mobility", "Rest"],
+        "workouts": {
+          "A": {
+            "name": "Workout A — Push & Hinge",
+            "focus": "push",
+            "exercises": [
+              { "exercise_id": "warmup-band-pull-aparts", "sets": 1, "reps": "10", "rest": "30s" },
+              { "exercise_id": "warmup-hip-circles", "sets": 1, "reps": "10", "rest": "30s" },
+              { "exercise_id": "goblet-squats", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 },
+              { "exercise_id": "kb-gorilla-rows", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 },
+              { "exercise_id": "kettlebell-swings", "sets": 3, "reps": "12-15", "rest": "60s", "starting_weight": 25, "weight_increment": 5 },
+              { "exercise_id": "swedish-ladder-pushups", "sets": 3, "reps": "8-12", "rest": "60s" },
+              { "exercise_id": "hanging-knee-raises", "sets": 3, "reps": "8-12", "rest": "60s" }
+            ]
+          },
+          "B": {
+            "name": "Workout B — Pull & Carry",
+            "focus": "pull",
+            "exercises": [
+              { "exercise_id": "warmup-band-pull-aparts", "sets": 1, "reps": "10", "rest": "30s" },
+              { "exercise_id": "warmup-worlds-greatest-stretch", "sets": 1, "reps": "5 each side", "rest": "30s" },
+              { "exercise_id": "trx-inverted-rows", "sets": 3, "reps": "8-12", "rest": "90s" },
+              { "exercise_id": "swedish-ladder-dead-hang", "sets": 3, "reps": "20-30s", "rest": "60s" },
+              { "exercise_id": "goblet-squats", "sets": 3, "reps": "8-12", "rest": "90s", "starting_weight": 20, "weight_increment": 5 }
+            ]
+          },
+          "Mobility": {
+            "name": "Mobility & Flow",
+            "focus": "mobility",
+            "exercises": [
+              { "exercise_id": "warmup-worlds-greatest-stretch", "sets": 2, "reps": "5 each side", "rest": "30s" },
+              { "exercise_id": "90-90-hip-switch", "sets": 2, "reps": "10 each side", "rest": "30s" },
+              { "exercise_id": "cat-cow-spinal-flow", "sets": 2, "reps": "10", "rest": "30s" },
+              { "exercise_id": "thread-the-needle", "sets": 2, "reps": "8 each side", "rest": "30s" },
+              { "exercise_id": "wall-slides", "sets": 2, "reps": "10", "rest": "30s" }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
