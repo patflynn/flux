@@ -11,6 +11,7 @@ import {
   clearAll,
   deleteLogEntry,
   loadLog,
+  loadProgram,
   loadState,
   putLogEntry,
   saveState,
@@ -19,6 +20,7 @@ import {
   applyImportFromFile,
   downloadExport,
   exportPayload,
+  formatImportMessage,
 } from './logic/exportImport';
 import type { LogEntry, LogMap, Phase, Program, WorkoutState } from './types';
 import { ExerciseCard } from './components/ExerciseCard';
@@ -40,18 +42,24 @@ export function Workouts() {
   const [video, setVideo] = useState<VideoState | null>(null);
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
-  // Programs are runtime data; they arrive via import or (future) AI
-  // generation. Step 4 wires this up to flux-db.
-  const [program] = useState<Program | null>(null);
+  // Programs are runtime data: they arrive via import or (future) AI
+  // generation, persisted to the 'program' store in flux-db. No bundled
+  // default — the empty state below covers a fresh install.
+  const [program, setProgram] = useState<Program | null>(null);
 
   useEffect(() => {
     (async () => {
-      const [s, l] = await Promise.all([loadState(), loadLog()]);
+      const [s, l, p] = await Promise.all([loadState(), loadLog(), loadProgram()]);
       setState(s);
       setLog(l);
+      setProgram(p);
       setLoaded(true);
     })();
   }, []);
+
+  function triggerImport() {
+    document.querySelector<HTMLInputElement>('[data-testid="import-input"]')?.click();
+  }
 
   const phase = getCurrentPhase(program, state);
   const workoutKey = phase ? workoutKeyForDay(phase, state.globalDay) : null;
@@ -159,13 +167,11 @@ export function Workouts() {
     if (!file) return;
     try {
       const result = await applyImportFromFile(file, { applyState: true });
-      const [s, l] = await Promise.all([loadState(), loadLog()]);
+      const [s, l, p] = await Promise.all([loadState(), loadLog(), loadProgram()]);
       setState(s);
       setLog(l);
-      setImportMessage(
-        `Imported ${result.imported} of ${result.total} entr${result.total === 1 ? 'y' : 'ies'}` +
-          (result.skipped ? ` (${result.skipped} skipped)` : ''),
-      );
+      setProgram(p);
+      setImportMessage(formatImportMessage(result));
     } catch (err) {
       setImportMessage(
         'Import failed: ' + (err instanceof Error ? err.message : 'unknown error'),
@@ -174,10 +180,11 @@ export function Workouts() {
   }
 
   async function handleReset() {
-    if (!confirm('Reset all progress? This clears day count and exercise log.')) return;
+    if (!confirm('Reset all progress? This clears day count, exercise log, and loaded program.')) return;
     await clearAll();
     setState({ ...DEFAULT_STATE });
     setLog({});
+    setProgram(null);
   }
 
   if (!loaded) {
@@ -218,8 +225,27 @@ export function Workouts() {
         >
           <h2 class="text-lg font-semibold text-flux-text-primary">No program loaded</h2>
           <p class="mt-1 text-sm text-flux-text-secondary">
-            Import a program file to get started, or wait for AI-generated programs.
+            Programs are user-specific. Import one to begin, or generate with AI (coming soon).
           </p>
+          <div class="mt-4 flex flex-wrap justify-center gap-2">
+            <button
+              type="button"
+              class="rounded border border-flux-accent bg-flux-accent/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-flux-accent"
+              onClick={triggerImport}
+              data-testid="import-program-btn"
+            >
+              Import program file
+            </button>
+            <button
+              type="button"
+              class="cursor-not-allowed rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-tertiary"
+              disabled
+              data-testid="generate-ai-btn"
+              title="AI program generation is on the roadmap."
+            >
+              Generate with AI (coming soon)
+            </button>
+          </div>
         </div>
       ) : workout ? (
         <>

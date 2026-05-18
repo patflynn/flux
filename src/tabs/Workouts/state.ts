@@ -1,11 +1,15 @@
 import { openDb, dbGet, dbPut, dbPutMany, dbDelete, dbClear, dbGetAll } from '../../db/idb';
-import type { LogEntry, LogMap, WorkoutState } from './types';
+import type { LogEntry, LogMap, Program, WorkoutState } from './types';
 
 const DB_NAME = 'flux-db';
-const DB_VERSION = 1;
+// Bumped to 2 to add the 'program' store. New users get it on first open;
+// existing users get an automatic onupgradeneeded migration via openDb.
+const DB_VERSION = 2;
 const STATE_STORE = 'state';
 const LOG_STORE = 'log';
+const PROGRAM_STORE = 'program';
 const STATE_KEY = 'current';
+const PROGRAM_KEY = 'current';
 
 const DIFFICULTIES = new Set(['easy', 'good', 'hard', 'failed']);
 
@@ -16,7 +20,11 @@ export function getDb(): Promise<IDBDatabase> {
     dbPromise = openDb({
       name: DB_NAME,
       version: DB_VERSION,
-      stores: [{ name: STATE_STORE }, { name: LOG_STORE }],
+      stores: [
+        { name: STATE_STORE },
+        { name: LOG_STORE },
+        { name: PROGRAM_STORE },
+      ],
     });
   }
   return dbPromise;
@@ -86,6 +94,23 @@ export async function clearAll(): Promise<void> {
   const db = await getDb();
   await dbClear(db, STATE_STORE);
   await dbClear(db, LOG_STORE);
+  await dbClear(db, PROGRAM_STORE);
+}
+
+export async function loadProgram(): Promise<Program | null> {
+  const db = await getDb();
+  const saved = await dbGet<Program>(db, PROGRAM_STORE, PROGRAM_KEY);
+  return saved ?? null;
+}
+
+export async function saveProgram(program: Program): Promise<void> {
+  const db = await getDb();
+  await dbPut(db, PROGRAM_STORE, program, PROGRAM_KEY);
+}
+
+export async function clearProgram(): Promise<void> {
+  const db = await getDb();
+  await dbDelete(db, PROGRAM_STORE, PROGRAM_KEY);
 }
 
 // Returns the parsed list of all log entries in insertion order. Useful for
