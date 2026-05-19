@@ -62,8 +62,14 @@ export function Settings() {
 
   async function handleReset() {
     if (!confirm('Reset all progress? This clears day count, exercise log, and loaded program.')) return;
-    await clearAll();
-    setImportMessage('Reset complete.');
+    try {
+      await clearAll();
+      setImportMessage('Reset complete.');
+    } catch (err) {
+      setImportMessage(
+        'Reset failed: ' + (err instanceof Error ? err.message : 'unknown error'),
+      );
+    }
   }
 
   return (
