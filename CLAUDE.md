@@ -1,5 +1,11 @@
 # Claude Code Rules for Flux
 
+## Product context
+
+Flux is the **workouts** surface of a three-app wellness toolset driven by an AI coach. The siblings are **vibe** (meditation, native Android, separate repo) and **balance** (check-ins / tracking, `gunk-dev/balance`, Capacitor + React, syncs via Google Sheets).
+
+The coach generates programs, reviews progress, adapts to mood / sickness / stress signals from check-ins, and schedules reminders. Flux is one of its expressions — design and architecture decisions should be evaluated against the coaching relationship, not against flux as a standalone app.
+
 ## Git & GitHub
 
 - **Never reference Claude in commits or PRs.** Do not include "Co-Authored-By: Claude" or any mention of Claude/AI in commit messages, PR titles, or PR descriptions.
