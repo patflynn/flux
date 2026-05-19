@@ -2,9 +2,9 @@
 
 ## Product context
 
-Flux is the **workouts** surface of a three-app wellness toolset driven by an AI coach. The siblings are **vibe** (meditation, native Android, separate repo) and **balance** (check-ins / tracking, `gunk-dev/balance`, Capacitor + React, syncs via Google Sheets).
+Flux is the **umbrella app** for a three-app wellness toolset driven by an AI coach. It implements the **workouts** surface directly, while its siblings are **vibe** (meditation, native Android, separate repo) and **balance** (check-ins / tracking, `gunk-dev/balance`, Capacitor + React, syncs via Google Sheets).
 
-The coach generates programs, reviews progress, adapts to mood / sickness / stress signals from check-ins, and schedules reminders. Flux is one of its expressions — design and architecture decisions should be evaluated against the coaching relationship, not against flux as a standalone app.
+The coach generates programs, reviews progress, adapts to mood / sickness / stress signals from check-ins, and schedules reminders. Flux is one of its expressions — design and architecture decisions should be evaluated against the coaching relationship, not against Flux as a standalone app.
 
 ## Git & GitHub
 
