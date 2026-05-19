@@ -220,7 +220,7 @@ export function Workouts() {
           <div class="mt-5 flex flex-wrap justify-center gap-2">
             <button
               type="button"
-              class="rounded-full bg-flux-accent px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-card shadow-flux-soft transition-opacity hover:opacity-90"
+              class="rounded-full bg-flux-accent px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-accent-fg shadow-flux-soft transition-opacity hover:opacity-90"
               onClick={triggerProgramImport}
               data-testid="import-program-btn"
             >
@@ -328,7 +328,7 @@ export function Workouts() {
         </button>
         <button
           type="button"
-          class="rounded-full bg-flux-accent px-5 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-card shadow-flux-soft transition-opacity hover:opacity-90"
+          class="rounded-full bg-flux-accent px-5 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-accent-fg shadow-flux-soft transition-opacity hover:opacity-90"
           onClick={nextDay}
           data-testid="next-day"
         >

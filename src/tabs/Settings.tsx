@@ -95,7 +95,7 @@ export function Settings() {
               class={
                 'rounded-full px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] transition-all ' +
                 (mode === m
-                  ? 'bg-flux-accent text-flux-card shadow-flux-soft'
+                  ? 'bg-flux-accent text-flux-accent-fg shadow-flux-soft'
                   : 'text-flux-text-secondary hover:text-flux-text-primary')
               }
               data-mode={m}
