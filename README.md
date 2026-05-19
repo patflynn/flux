@@ -32,14 +32,21 @@ nix develop .#test --command npx playwright test
 
 ## Android
 
+The `android` dev shell provides JDK 17, gradle, and the Android SDK
+(platform 34, build-tools 34.0.0). It pulls multi-GB unfree SDK components,
+so it is intentionally separate from the default shell:
+
 ```bash
-nix develop --command npm run build
-npx cap sync android
-cd android && ./gradlew assembleDebug
+nix develop .#android --command npm ci
+nix develop .#android --command bash -c "npm run build && npx cap sync android"
+nix develop .#android --command bash -c "cd android && ./gradlew assembleDebug"
 ```
 
-The Android build requires a host-installed Android SDK + JDK; it is not run
-in CI yet.
+The debug APK lands at `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+CI builds the APK via `setup-java` + `setup-android` in
+`.github/workflows/test.yml` rather than this nix shell — the toolchains are
+decoupled intentionally.
 
 ## Project layout
 

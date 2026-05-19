@@ -54,6 +54,49 @@
           '';
         };
 
+        # Separate shell for Android builds. Scoped here (not on the default
+        # shell) because androidenv pulls multi-GB unfree SDK components.
+        devShells.android =
+          let
+            androidPkgs = import nixpkgs {
+              inherit system;
+              config = {
+                allowUnfree = true;
+                android_sdk.accept_license = true;
+              };
+            };
+            androidComposition = androidPkgs.androidenv.composeAndroidPackages {
+              platformVersions = [ "34" ];
+              buildToolsVersions = [ "34.0.0" ];
+              includeNDK = false;
+            };
+            androidSdk = androidComposition.androidsdk;
+          in
+          androidPkgs.mkShell {
+            buildInputs = with androidPkgs; [
+              nodejs_20
+              jdk17
+              gradle
+              androidSdk
+            ];
+
+            ANDROID_HOME = "${androidSdk}/libexec/android-sdk";
+            ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
+            # AGP 8.x looks up aapt2; point it at the nix-provided one so gradle
+            # doesn't try to download its own copy.
+            GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/34.0.0/aapt2";
+
+            shellHook = ''
+              echo "Flux android dev shell"
+              echo "  ANDROID_HOME=$ANDROID_HOME"
+              echo ""
+              echo "Commands:"
+              echo "  npm ci && npm run build && npx cap sync android   - sync web bundle into android/"
+              echo "  (cd android && ./gradlew assembleDebug)            - build debug APK"
+              echo "  (cd android && ./gradlew tasks)                    - list gradle tasks"
+            '';
+          };
+
         packages.default =
           let
             commit = self.shortRev or self.dirtyShortRev or "dev";
