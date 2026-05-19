@@ -48,6 +48,22 @@ CI builds the APK via `setup-java` + `setup-android` in
 `.github/workflows/test.yml` rather than this nix shell — the toolchains are
 decoupled intentionally.
 
+## Local Android install
+
+Build and install the debug APK on a connected device (USB or Android Studio
+wireless debugging):
+
+```
+nix develop .#android --command ./scripts/local-install.sh
+```
+
+The script: `npm ci` → `vite build` → `cap sync` → `./gradlew assembleDebug` →
+`adb install -r`. First gradle run pulls AGP + AndroidX deps (a few minutes);
+subsequent runs are fast. If install fails with a signature mismatch (a
+previously-installed CI build has a different debug keystore),
+`adb uninstall dev.gunk.flux` and re-run — your IndexedDB data will be wiped,
+so export a backup first via Settings → Data → Export if it matters.
+
 ## Project layout
 
 ```
