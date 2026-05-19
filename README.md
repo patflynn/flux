@@ -57,12 +57,14 @@ wireless debugging):
 nix develop .#android --command ./scripts/local-install.sh
 ```
 
-The script: `npm ci` → `vite build` → `cap sync` → `./gradlew assembleDebug` →
+The script: `npm install` → `vite build` → `cap sync` → `./gradlew assembleDebug` →
 `adb install -r`. First gradle run pulls AGP + AndroidX deps (a few minutes);
 subsequent runs are fast. If install fails with a signature mismatch (a
-previously-installed CI build has a different debug keystore),
-`adb uninstall dev.gunk.flux` and re-run — your IndexedDB data will be wiped,
-so export a backup first via Settings → Data → Export if it matters.
+previously-installed CI build has a different debug keystore), uninstall the
+app (`adb uninstall <appId>`, where `<appId>` is the `appId` from
+`capacitor.config.ts` — currently `dev.gunk.flux`) and re-run. Your IndexedDB
+data will be wiped, so export a backup first via Settings → Data → Export if
+it matters.
 
 ## Project layout
 
