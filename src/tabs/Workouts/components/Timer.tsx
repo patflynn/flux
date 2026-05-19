@@ -65,23 +65,30 @@ export function Timer({ label, seconds, testId }: Props) {
     setFinished(false);
   }
 
+  const active = running || finished;
+
   return (
     <div
-      class="inline-flex items-center gap-2 rounded-md border border-flux-border bg-flux-soft px-2 py-1 text-xs"
+      class={
+        'inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ' +
+        (active ? 'bg-flux-accent/20' : 'bg-flux-soft')
+      }
       data-testid={testId}
     >
-      <span class="font-mono uppercase tracking-wider text-flux-text-tertiary">{label}</span>
+      <span class="text-[9px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">
+        {label}
+      </span>
       <span
         class={
-          'font-mono text-sm tabular-nums ' +
-          (finished ? 'text-flux-accent' : 'text-flux-text-primary')
+          'text-sm font-medium tabular-nums ' +
+          (finished ? 'text-flux-accent-dim' : 'text-flux-text-primary')
         }
       >
         {formatTime(remaining)}
       </span>
       <button
         type="button"
-        class="rounded border border-flux-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary disabled:opacity-40"
+        class="rounded-full bg-flux-card px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.15em] text-flux-text-secondary transition-colors hover:text-flux-text-primary disabled:opacity-40"
         onClick={startPause}
         disabled={finished}
       >
@@ -89,7 +96,7 @@ export function Timer({ label, seconds, testId }: Props) {
       </button>
       <button
         type="button"
-        class="rounded border border-flux-border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
+        class="rounded-full bg-flux-card px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.15em] text-flux-text-secondary transition-colors hover:text-flux-text-primary"
         onClick={reset}
       >
         Rst

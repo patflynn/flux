@@ -174,7 +174,7 @@ export function Workouts() {
   if (!loaded) {
     return (
       <section class="flex h-full items-center justify-center">
-        <p class="text-sm text-flux-text-tertiary">Loading workout…</p>
+        <p class="text-xs uppercase tracking-[0.2em] text-flux-text-tertiary">Loading workout…</p>
       </section>
     );
   }
@@ -183,38 +183,44 @@ export function Workouts() {
   const progressPercent = totalExercises > 0 ? (completedCount / totalExercises) * 100 : 0;
 
   return (
-    <section class="mx-auto max-w-2xl space-y-4" data-testid="workouts-root">
-      <header class="space-y-1">
-        <h1 class="font-mono text-xs uppercase tracking-[0.2em] text-flux-text-tertiary">
+    <section class="mx-auto max-w-2xl space-y-6" data-testid="workouts-root">
+      <header class="flex flex-col items-center gap-2 pt-2 text-center">
+        <h1 class="text-sm font-medium uppercase tracking-[0.28em] text-flux-text-primary">
           Workouts
         </h1>
-        <div class="flex flex-wrap items-baseline gap-3">
-          <p class="font-mono text-xs text-flux-text-tertiary">
+        <div class="flex items-baseline gap-2 text-[10px] uppercase tracking-[0.2em] text-flux-text-tertiary">
+          <span>
             Day <span class="text-flux-text-primary" data-testid="day-counter">{state.globalDay}</span>
-            <span class="mx-1.5">·</span>
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>
             Week <span class="text-flux-text-primary">{week}</span>
-          </p>
+          </span>
           {phase && (
-            <p class="text-xs text-flux-text-secondary" data-testid="phase-name">
-              {phase.name}
-            </p>
+            <>
+              <span aria-hidden="true">·</span>
+              <span data-testid="phase-name">{phase.name}</span>
+            </>
           )}
         </div>
       </header>
 
       {!program ? (
         <div
-          class="rounded-lg border border-flux-border bg-flux-card p-6 text-center"
+          class="rounded-[2rem] bg-flux-card p-8 text-center shadow-flux-card"
           data-testid="no-program"
         >
-          <h2 class="text-lg font-semibold text-flux-text-primary">No program loaded</h2>
-          <p class="mt-1 text-sm text-flux-text-secondary">
+          <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-flux-text-tertiary">
+            Empty
+          </p>
+          <h2 class="mt-3 text-lg font-medium text-flux-text-primary">No program loaded</h2>
+          <p class="mt-2 text-sm text-flux-text-secondary">
             Programs are user-specific. Import one to begin, or generate with AI (coming soon).
           </p>
-          <div class="mt-4 flex flex-wrap justify-center gap-2">
+          <div class="mt-5 flex flex-wrap justify-center gap-2">
             <button
               type="button"
-              class="rounded border border-flux-accent bg-flux-accent/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-flux-accent"
+              class="rounded-full bg-flux-accent px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-card shadow-flux-soft transition-opacity hover:opacity-90"
               onClick={triggerProgramImport}
               data-testid="import-program-btn"
             >
@@ -222,12 +228,12 @@ export function Workouts() {
             </button>
             <button
               type="button"
-              class="cursor-not-allowed rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-tertiary"
+              class="cursor-not-allowed rounded-full bg-flux-soft px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-text-tertiary"
               disabled
               data-testid="generate-ai-btn"
               title="AI program generation is on the roadmap."
             >
-              Generate with AI (coming soon)
+              Generate with AI (soon)
             </button>
           </div>
           <input
@@ -241,27 +247,33 @@ export function Workouts() {
       ) : workout ? (
         <>
           <div
-            class="overflow-hidden rounded-lg border border-flux-border bg-flux-card"
+            class="overflow-hidden rounded-[2rem] bg-flux-card p-6 shadow-flux-card"
             data-testid="workout-card"
           >
-            <div class="border-b border-flux-border p-4">
-              <h2 class="text-lg font-semibold text-flux-text-primary" data-testid="workout-name">
-                {workout.name}
-              </h2>
-              <p class="mt-0.5 text-xs uppercase tracking-wider text-flux-text-tertiary">
-                {workout.focus}
-              </p>
-            </div>
-            <div class="h-1 bg-flux-soft">
-              <div
-                class="h-full bg-flux-accent transition-all"
-                style={{ width: `${progressPercent}%` }}
-                data-testid="session-progress"
-              />
+            <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-flux-text-tertiary">
+              {workout.focus}
+            </p>
+            <h2
+              class="mt-2 text-2xl font-medium leading-tight text-flux-text-primary"
+              data-testid="workout-name"
+            >
+              {workout.name}
+            </h2>
+            <div class="mt-5 flex items-center gap-3">
+              <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-flux-soft">
+                <div
+                  class="h-full rounded-full bg-flux-accent transition-all"
+                  style={{ width: `${progressPercent}%` }}
+                  data-testid="session-progress"
+                />
+              </div>
+              <span class="text-[10px] font-medium uppercase tracking-[0.15em] tabular-nums text-flux-text-tertiary">
+                {completedCount}/{totalExercises}
+              </span>
             </div>
           </div>
 
-          <div class="space-y-3" data-testid="exercises-list">
+          <div class="space-y-4" data-testid="exercises-list">
             {resolvedExercises.map((ex, i) => {
               const key = `${state.globalDay}_${i}`;
               const last = latestWeights.get(ex.name) ?? null;
@@ -291,20 +303,23 @@ export function Workouts() {
         </>
       ) : (
         <div
-          class="rounded-lg border border-flux-border bg-flux-card p-6 text-center"
+          class="rounded-[2rem] bg-flux-card p-8 text-center shadow-flux-card"
           data-testid="rest-day"
         >
-          <h2 class="text-lg font-semibold text-flux-text-primary">Rest day</h2>
-          <p class="mt-1 text-sm text-flux-text-secondary">
+          <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-flux-text-tertiary">
+            Today
+          </p>
+          <h2 class="mt-3 text-2xl font-medium text-flux-text-primary">Rest day</h2>
+          <p class="mt-2 text-sm text-flux-text-secondary">
             Recovery is part of the program. Mobility welcome.
           </p>
         </div>
       )}
 
-      <div class="flex flex-wrap items-center gap-2 border-t border-flux-border pt-4">
+      <div class="flex flex-wrap items-center gap-2 pt-2">
         <button
           type="button"
-          class="rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
+          class="rounded-full bg-flux-card px-4 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-text-secondary shadow-flux-soft transition-opacity hover:text-flux-text-primary disabled:opacity-40"
           onClick={prevDay}
           disabled={state.globalDay <= 1}
           data-testid="prev-day"
@@ -313,7 +328,7 @@ export function Workouts() {
         </button>
         <button
           type="button"
-          class="rounded border border-flux-accent bg-flux-accent/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-flux-accent"
+          class="rounded-full bg-flux-accent px-5 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-card shadow-flux-soft transition-opacity hover:opacity-90"
           onClick={nextDay}
           data-testid="next-day"
         >
@@ -323,7 +338,7 @@ export function Workouts() {
 
       {importMessage && (
         <div
-          class="flex items-start justify-between gap-2 rounded border border-flux-border bg-flux-card px-3 py-2 text-xs text-flux-text-secondary"
+          class="flex items-start justify-between gap-2 rounded-2xl bg-flux-card px-4 py-3 text-xs text-flux-text-secondary shadow-flux-soft"
           data-testid="program-import-message"
         >
           <span class="flex-1">{importMessage}</span>

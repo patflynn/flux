@@ -20,8 +20,12 @@ export default {
         },
       },
       fontFamily: {
-        mono: ['JetBrains Mono', 'ui-monospace', 'SF Mono', 'Menlo', 'monospace'],
-        sans: ['Inter Tight', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+      },
+      boxShadow: {
+        'flux-card': '0 8px 30px rgba(0, 0, 0, 0.04)',
+        'flux-soft': '0 4px 20px rgba(0, 0, 0, 0.03)',
+        'flux-nav': '0 -4px 30px rgba(0, 0, 0, 0.04)',
       },
     },
   },
