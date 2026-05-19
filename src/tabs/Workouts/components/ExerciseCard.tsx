@@ -191,7 +191,7 @@ export function ExerciseCard({
           </button>
           <input
             type="number"
-            class="w-20 rounded-xl bg-flux-soft px-3 py-1.5 text-center text-sm font-medium tabular-nums text-flux-text-primary outline-none placeholder:text-flux-text-tertiary"
+            class="w-20 rounded-xl bg-flux-soft px-3 py-1.5 text-center text-sm font-medium tabular-nums text-flux-text-primary placeholder:text-flux-text-tertiary"
             value={weight ?? ''}
             placeholder={placeholder}
             onInput={handleWeightInput}
@@ -222,7 +222,7 @@ export function ExerciseCard({
           class={
             'w-full rounded-2xl px-4 py-3 text-xs font-medium uppercase tracking-[0.2em] transition-all ' +
             (completed
-              ? 'bg-flux-accent text-flux-card shadow-flux-soft'
+              ? 'bg-flux-accent text-flux-accent-fg shadow-flux-soft'
               : 'bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
           }
           onClick={toggleDone}
@@ -244,7 +244,7 @@ export function ExerciseCard({
                     class={
                       'rounded-full px-2 py-2 text-[10px] font-medium uppercase tracking-[0.15em] transition-colors ' +
                       (selected
-                        ? 'bg-flux-accent text-flux-card'
+                        ? 'bg-flux-accent text-flux-accent-fg'
                         : 'bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
                     }
                     onClick={() => setDifficulty(d)}
@@ -300,7 +300,7 @@ export function ExerciseCard({
         )}
 
         <textarea
-          class="mt-4 block w-full rounded-2xl bg-flux-soft px-4 py-3 text-xs text-flux-text-primary outline-none placeholder:text-flux-text-tertiary"
+          class="mt-4 block w-full rounded-2xl bg-flux-soft px-4 py-3 text-xs text-flux-text-primary placeholder:text-flux-text-tertiary"
           rows={2}
           placeholder="Notes (optional)"
           value={notes}

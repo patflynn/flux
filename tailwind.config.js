@@ -8,6 +8,7 @@ export default {
         flux: {
           accent: 'var(--flux-accent)',
           'accent-dim': 'var(--flux-accent-dim)',
+          'accent-fg': 'var(--flux-accent-fg)',
           bg: 'var(--flux-bg)',
           card: 'var(--flux-card)',
           soft: 'var(--flux-soft)',

@@ -69,7 +69,7 @@ export function App({ entry }: { entry: EntryTab }) {
                 class={
                   'rounded-full px-2 py-2.5 text-[10px] font-medium uppercase tracking-[0.18em] transition-all ' +
                   (selected
-                    ? 'bg-flux-accent text-flux-card shadow-flux-soft'
+                    ? 'bg-flux-accent text-flux-accent-fg shadow-flux-soft'
                     : 'text-flux-text-tertiary hover:text-flux-text-secondary')
                 }
               >

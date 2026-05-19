@@ -31,6 +31,10 @@
   --flux-text-tertiary: rgba(162, 184, 173, 0.72);
   --flux-accent: #a2b8ad;
   --flux-accent-dim: #7d9489;
+  /* Foreground for content sitting on --flux-accent. Mint is identical in
+     both themes, so we use a deep forest tone here to clear WCAG AA
+     (~6.9:1) on the same background regardless of mode. */
+  --flux-accent-fg: #252b26;
   --flux-danger: #c98686;
 }
 
@@ -45,6 +49,7 @@
   --flux-text-tertiary: #8d978f;
   --flux-accent: #a2b8ad;
   --flux-accent-dim: #7d9489;
+  --flux-accent-fg: #252b26;
   --flux-danger: #b85c5c;
 }
 
