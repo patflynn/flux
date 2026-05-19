@@ -1,33 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Theme tokens. Default to dark; light overrides via [data-mode="light"]. */
+/*
+ * Balance design language ported to flux.
+ *
+ * Source palette (light mode = balance verbatim):
+ *   sage   #dce3d0 — app background
+ *   cream  #f4f3ea — primary card surface
+ *   sand   #e8e6dd — secondary surface (inputs, soft chips)
+ *   forest #4a534b — primary text + dark accent button
+ *   mint   #a2b8ad — call-to-action surfaces, completed states
+ *
+ * Dark mode is derived to preserve balance's warm/earthy spirit
+ * (no grey reversion). Bg/card/soft are stepped from a deep
+ * muted-green; text uses dimmed cream; mint is shared with light.
+ */
+
 :root {
-  --flux-bg: oklch(0.16 0.005 250);
-  --flux-card: oklch(0.20 0.006 250);
-  --flux-soft: oklch(0.24 0.006 250);
-  --flux-border: oklch(0.28 0.006 250);
-  --flux-border-strong: oklch(0.34 0.006 250);
-  --flux-text-primary: oklch(0.96 0.005 80);
-  --flux-text-secondary: oklch(0.72 0.008 80);
-  --flux-text-tertiary: oklch(0.52 0.008 80);
-  --flux-accent: oklch(0.78 0.09 155);
-  --flux-accent-dim: oklch(0.66 0.09 155);
-  --flux-danger: oklch(0.58 0.18 25);
+  /* Dark mode is the legacy default; matches index.html's `class="dark"`. */
+  --flux-bg: #2a302b;
+  --flux-card: #363d37;
+  --flux-soft: #3f4740;
+  --flux-border: rgba(244, 243, 234, 0.07);
+  --flux-border-strong: rgba(244, 243, 234, 0.14);
+  --flux-text-primary: #ece9dc;
+  --flux-text-secondary: rgba(184, 196, 188, 0.92);
+  --flux-text-tertiary: rgba(162, 184, 173, 0.72);
+  --flux-accent: #a2b8ad;
+  --flux-accent-dim: #7d9489;
+  --flux-danger: #c98686;
 }
 
 [data-mode='light'] {
-  --flux-bg: oklch(0.985 0.004 80);
-  --flux-card: oklch(0.995 0.003 80);
-  --flux-soft: oklch(0.965 0.005 80);
-  --flux-border: oklch(0.92 0.005 80);
-  --flux-border-strong: oklch(0.88 0.005 80);
-  --flux-text-primary: oklch(0.18 0.01 250);
-  --flux-text-secondary: oklch(0.42 0.01 250);
-  --flux-text-tertiary: oklch(0.62 0.01 250);
-  --flux-accent: oklch(0.62 0.07 155);
-  --flux-accent-dim: oklch(0.52 0.07 155);
+  --flux-bg: #dce3d0;
+  --flux-card: #f4f3ea;
+  --flux-soft: #e8e6dd;
+  --flux-border: rgba(74, 83, 75, 0.08);
+  --flux-border-strong: rgba(74, 83, 75, 0.16);
+  --flux-text-primary: #4a534b;
+  --flux-text-secondary: #6e7972;
+  --flux-text-tertiary: #8d978f;
+  --flux-accent: #a2b8ad;
+  --flux-accent-dim: #7d9489;
+  --flux-danger: #b85c5c;
 }
 
 html,
@@ -40,7 +58,13 @@ body {
   margin: 0;
   background: var(--flux-bg);
   color: var(--flux-text-primary);
-  font-family: 'Inter Tight', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
-  letter-spacing: -0.005em;
+}
+
+/* Focus rings — visible on dark or light, mint-tinted to match palette. */
+:where(button, [role='tab'], a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--flux-accent);
+  outline-offset: 2px;
+  border-radius: inherit;
 }

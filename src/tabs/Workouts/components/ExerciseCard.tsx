@@ -107,22 +107,22 @@ export function ExerciseCard({
   return (
     <article
       class={
-        'rounded-lg border p-4 transition-colors ' +
+        'rounded-[2rem] p-6 transition-all ' +
         (completed
-          ? 'border-flux-accent/40 bg-flux-card'
-          : 'border-flux-border bg-flux-card')
+          ? 'bg-flux-accent/15 shadow-flux-card'
+          : 'bg-flux-card shadow-flux-card')
       }
       data-exercise-index={index}
       data-completed={completed ? 'true' : 'false'}
     >
-      <header class="flex items-start justify-between gap-2">
-        <div class="flex flex-1 flex-wrap items-center gap-2">
-          <h3 class="text-base font-semibold leading-tight text-flux-text-primary">
+      <header class="flex items-start justify-between gap-3">
+        <div class="flex-1">
+          <h3 class="text-lg font-medium leading-tight text-flux-text-primary">
             {exercise.name}
           </h3>
           {exercise.unmapped && (
             <span
-              class="rounded border border-flux-border bg-flux-soft px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-flux-text-tertiary"
+              class="mt-1 inline-block rounded-full bg-flux-soft px-2.5 py-0.5 text-[10px] uppercase tracking-[0.15em] text-flux-text-tertiary"
               data-testid={`unmapped-${index}`}
               title="Imported from a legacy export. No demo or technique notes available."
             >
@@ -133,31 +133,40 @@ export function ExerciseCard({
         {exercise.demoVideoId ? (
           <button
             type="button"
-            class="shrink-0 rounded border border-flux-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
+            class="shrink-0 rounded-full bg-flux-soft px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-flux-text-secondary transition-colors hover:text-flux-text-primary"
             onClick={() => onPlayVideo(exercise.demoVideoId!, exercise.demoVideoStart)}
             data-testid={`video-${index}`}
           >
             Video
           </button>
         ) : (
-          <span class="shrink-0 rounded border border-flux-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-flux-text-tertiary">
+          <span class="shrink-0 rounded-full bg-flux-soft px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-flux-text-tertiary">
             No video
           </span>
         )}
       </header>
 
-      <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-flux-text-secondary">
-        <span><strong class="text-flux-text-primary">{exercise.sets}</strong> sets</span>
-        <span><strong class="text-flux-text-primary">{exercise.reps}</strong> reps</span>
-        <span><strong class="text-flux-text-primary">{exercise.rest}</strong> rest</span>
-      </div>
+      <dl class="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-flux-soft px-4 py-3">
+        <div class="flex flex-col items-center">
+          <dt class="text-[9px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">Sets</dt>
+          <dd class="mt-0.5 text-base font-medium text-flux-text-primary">{exercise.sets}</dd>
+        </div>
+        <div class="flex flex-col items-center border-x border-flux-border">
+          <dt class="text-[9px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">Reps</dt>
+          <dd class="mt-0.5 text-base font-medium text-flux-text-primary">{exercise.reps}</dd>
+        </div>
+        <div class="flex flex-col items-center">
+          <dt class="text-[9px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">Rest</dt>
+          <dd class="mt-0.5 text-base font-medium text-flux-text-primary">{exercise.rest}</dd>
+        </div>
+      </dl>
 
       {exercise.techniqueNote && (
-        <p class="mt-2 text-xs leading-snug text-flux-text-tertiary">{exercise.techniqueNote}</p>
+        <p class="mt-3 text-xs leading-snug text-flux-text-tertiary">{exercise.techniqueNote}</p>
       )}
 
       {(repSeconds || restSeconds) && (
-        <div class="mt-3 flex flex-wrap gap-2">
+        <div class="mt-4 flex flex-wrap gap-2">
           {repSeconds && (
             <Timer label="Exercise" seconds={repSeconds} testId={`timer-ex-${index}`} />
           )}
@@ -168,11 +177,13 @@ export function ExerciseCard({
       )}
 
       {exercise.usesWeight && (
-        <div class="mt-3 flex items-center gap-2">
-          <span class="text-xs uppercase tracking-wider text-flux-text-tertiary">Weight</span>
+        <div class="mt-4 flex items-center gap-2">
+          <span class="text-[10px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">
+            Weight
+          </span>
           <button
             type="button"
-            class="h-7 w-7 rounded border border-flux-border text-flux-text-secondary hover:text-flux-text-primary"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-flux-soft text-base text-flux-text-secondary transition-colors hover:text-flux-text-primary"
             onClick={() => setWeight((weight ?? suggestedWeight ?? MIN_WEIGHT) - increment)}
             aria-label="Decrease weight"
           >
@@ -180,7 +191,7 @@ export function ExerciseCard({
           </button>
           <input
             type="number"
-            class="w-20 rounded border border-flux-border bg-flux-soft px-2 py-1 font-mono text-sm text-flux-text-primary"
+            class="w-20 rounded-xl bg-flux-soft px-3 py-1.5 text-center text-sm font-medium tabular-nums text-flux-text-primary outline-none placeholder:text-flux-text-tertiary"
             value={weight ?? ''}
             placeholder={placeholder}
             onInput={handleWeightInput}
@@ -188,39 +199,41 @@ export function ExerciseCard({
           />
           <button
             type="button"
-            class="h-7 w-7 rounded border border-flux-border text-flux-text-secondary hover:text-flux-text-primary"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-flux-soft text-base text-flux-text-secondary transition-colors hover:text-flux-text-primary"
             onClick={() => setWeight((weight ?? suggestedWeight ?? MIN_WEIGHT) + increment)}
             aria-label="Increase weight"
           >
             +
           </button>
-          <span class="text-xs text-flux-text-tertiary">lbs</span>
+          <span class="text-[10px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">
+            lbs
+          </span>
           {suggestedWeight != null && (
-            <span class="ml-auto text-[10px] uppercase tracking-wider text-flux-text-tertiary">
-              suggested {suggestedWeight}
+            <span class="ml-auto text-[10px] uppercase tracking-[0.15em] text-flux-text-tertiary">
+              ~{suggestedWeight}
             </span>
           )}
         </div>
       )}
 
-      <div class="mt-3">
+      <div class="mt-5">
         <button
           type="button"
           class={
-            'w-full rounded border px-3 py-2 text-sm font-semibold uppercase tracking-wider transition-colors ' +
+            'w-full rounded-2xl px-4 py-3 text-xs font-medium uppercase tracking-[0.2em] transition-all ' +
             (completed
-              ? 'border-flux-accent bg-flux-accent/15 text-flux-accent'
-              : 'border-flux-border bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
+              ? 'bg-flux-accent text-flux-card shadow-flux-soft'
+              : 'bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
           }
           onClick={toggleDone}
           data-testid={`done-${index}`}
         >
-          {completed ? '✓ Done' : 'Done'}
+          {completed ? '✓ Done' : 'Mark Done'}
         </button>
 
         {completed && (
           <>
-            <div class="mt-3 grid grid-cols-4 gap-1">
+            <div class="mt-4 grid grid-cols-4 gap-1.5">
               {(['failed', 'easy', 'good', 'hard'] as const).map((d) => {
                 const selected = difficulty === d || (!difficulty && d === 'good');
                 return (
@@ -229,10 +242,10 @@ export function ExerciseCard({
                     type="button"
                     aria-pressed={selected}
                     class={
-                      'rounded border px-2 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors ' +
+                      'rounded-full px-2 py-2 text-[10px] font-medium uppercase tracking-[0.15em] transition-colors ' +
                       (selected
-                        ? 'border-flux-accent bg-flux-accent/15 text-flux-accent'
-                        : 'border-flux-border bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
+                        ? 'bg-flux-accent text-flux-card'
+                        : 'bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
                     }
                     onClick={() => setDifficulty(d)}
                     data-testid={`difficulty-${index}-${d}`}
@@ -244,15 +257,15 @@ export function ExerciseCard({
             </div>
 
             {difficulty === 'failed' && (
-              <div class="mt-3 space-y-2 rounded border border-flux-border bg-flux-soft p-2">
-                <label class="block text-[11px] uppercase tracking-wider text-flux-text-tertiary">
+              <div class="mt-4 space-y-3 rounded-2xl bg-flux-soft p-4">
+                <label class="block text-[10px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">
                   Failed on set: <span class="text-flux-text-primary">{failedSet}</span> / {maxSets}
                   <input
                     type="range"
                     min={1}
                     max={maxSets}
                     value={failedSet}
-                    class="mt-1 block w-full"
+                    class="mt-2 block w-full accent-flux-accent"
                     onChange={(e) =>
                       onLog(key, {
                         exercise: exercise.name,
@@ -263,14 +276,14 @@ export function ExerciseCard({
                     }
                   />
                 </label>
-                <label class="block text-[11px] uppercase tracking-wider text-flux-text-tertiary">
+                <label class="block text-[10px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">
                   Failed on rep: <span class="text-flux-text-primary">{failedRep}</span> / {maxReps}
                   <input
                     type="range"
                     min={1}
                     max={maxReps}
                     value={failedRep}
-                    class="mt-1 block w-full"
+                    class="mt-2 block w-full accent-flux-accent"
                     onChange={(e) =>
                       onLog(key, {
                         exercise: exercise.name,
@@ -287,7 +300,7 @@ export function ExerciseCard({
         )}
 
         <textarea
-          class="mt-3 block w-full rounded border border-flux-border bg-flux-soft px-2 py-1.5 font-mono text-xs text-flux-text-primary placeholder:text-flux-text-tertiary"
+          class="mt-4 block w-full rounded-2xl bg-flux-soft px-4 py-3 text-xs text-flux-text-primary outline-none placeholder:text-flux-text-tertiary"
           rows={2}
           placeholder="Notes (optional)"
           value={notes}

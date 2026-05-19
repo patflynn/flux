@@ -73,23 +73,30 @@ export function Settings() {
   }
 
   return (
-    <section class="mx-auto max-w-md space-y-6">
-      <h1 class="text-2xl font-semibold text-flux-text-primary">Settings</h1>
+    <section class="mx-auto max-w-md space-y-5">
+      <header class="flex flex-col items-center gap-1 pt-2 text-center">
+        <h1 class="text-sm font-medium uppercase tracking-[0.28em] text-flux-text-primary">
+          Settings
+        </h1>
+        <p class="text-[10px] uppercase tracking-[0.2em] text-flux-text-tertiary">
+          Preferences & data
+        </p>
+      </header>
 
-      <div class="rounded-lg border border-flux-border bg-flux-card p-4">
-        <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-flux-text-tertiary">
+      <div class="rounded-[2rem] bg-flux-card p-6 shadow-flux-card">
+        <h2 class="text-[10px] font-medium uppercase tracking-[0.2em] text-flux-text-tertiary">
           Appearance
         </h2>
-        <div class="mt-3 inline-flex overflow-hidden rounded border border-flux-border">
+        <div class="mt-4 inline-flex rounded-full bg-flux-soft p-1">
           {(['dark', 'light'] as const).map((m) => (
             <button
               key={m}
               type="button"
               class={
-                'px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors ' +
+                'rounded-full px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] transition-all ' +
                 (mode === m
-                  ? 'bg-flux-accent/15 text-flux-accent'
-                  : 'bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
+                  ? 'bg-flux-accent text-flux-card shadow-flux-soft'
+                  : 'text-flux-text-secondary hover:text-flux-text-primary')
               }
               data-mode={m}
               onClick={() => setMode(m)}
@@ -100,30 +107,30 @@ export function Settings() {
         </div>
       </div>
 
-      <div class="rounded-lg border border-flux-border bg-flux-card p-4">
-        <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-flux-text-tertiary">
+      <div class="rounded-[2rem] bg-flux-card p-6 shadow-flux-card">
+        <h2 class="text-[10px] font-medium uppercase tracking-[0.2em] text-flux-text-tertiary">
           LLM provider
         </h2>
-        <p class="mt-2 text-sm text-flux-text-secondary">
+        <p class="mt-3 text-sm text-flux-text-secondary">
           {available ? 'Configured' : 'Not configured'}
         </p>
       </div>
 
-      <div class="rounded-lg border border-flux-border bg-flux-card p-4">
-        <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-flux-text-tertiary">
+      <div class="rounded-[2rem] bg-flux-card p-6 shadow-flux-card">
+        <h2 class="text-[10px] font-medium uppercase tracking-[0.2em] text-flux-text-tertiary">
           Data
         </h2>
-        <div class="mt-3 flex flex-wrap items-center gap-2">
+        <div class="mt-4 flex flex-wrap items-center gap-2">
           <button
             type="button"
-            class="rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
+            class="rounded-full bg-flux-soft px-4 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-text-secondary transition-colors hover:text-flux-text-primary"
             onClick={handleExport}
             data-testid="export-btn"
           >
             Export
           </button>
           <label
-            class="cursor-pointer rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
+            class="cursor-pointer rounded-full bg-flux-soft px-4 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-text-secondary transition-colors hover:text-flux-text-primary"
             data-testid="import-backup-label"
           >
             Import Backup
@@ -138,7 +145,7 @@ export function Settings() {
         </div>
         {importMessage && (
           <div
-            class="mt-3 flex items-start justify-between gap-2 rounded border border-flux-border bg-flux-soft px-3 py-2 text-xs text-flux-text-secondary"
+            class="mt-4 flex items-start justify-between gap-2 rounded-2xl bg-flux-soft px-4 py-3 text-xs text-flux-text-secondary"
             data-testid="backup-import-message"
           >
             <span class="flex-1">{importMessage}</span>
@@ -154,13 +161,13 @@ export function Settings() {
           </div>
         )}
 
-        <div class="mt-4 border-t border-flux-border pt-4">
-          <p class="text-[11px] font-semibold uppercase tracking-wider text-flux-danger">
+        <div class="mt-5 border-t border-flux-border pt-4">
+          <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-flux-danger">
             Danger zone
           </p>
           <button
             type="button"
-            class="mt-2 rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-danger hover:opacity-80"
+            class="mt-3 rounded-full bg-flux-soft px-4 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-danger transition-opacity hover:opacity-80"
             onClick={handleReset}
             data-testid="reset-btn"
           >
