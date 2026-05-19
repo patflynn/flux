@@ -21,7 +21,12 @@ async function resetAndSeedProgram(page: import('@playwright/test').Page) {
   });
   await page.reload();
   await page.getByTestId('import-program-btn').waitFor();
+  // Backup import lives in the Settings tab now — seed via Settings, then
+  // switch back to Workouts so the tab re-mounts and reloads from IDB.
+  await page.locator('[data-tab="settings"]').click();
   await page.getByTestId('import-input').setInputFiles(PROGRAM_FIXTURE);
+  await expect(page.getByTestId('import-message')).toContainText('Imported');
+  await page.locator('[data-tab="workouts"]').click();
   await expect(page.getByTestId('workout-name')).toBeVisible();
 }
 

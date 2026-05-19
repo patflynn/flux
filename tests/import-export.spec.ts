@@ -18,10 +18,15 @@ test('imports a legacy export file and exposes history', async ({ page }) => {
   });
   await page.reload();
 
-  // The fixture's state.globalDay is 8. After import we should land there.
+  // Backup import lives on the Settings tab now.
+  await page.locator('[data-tab="settings"]').click();
   await page.getByTestId('import-input').setInputFiles(FIXTURE_PATH);
-
   await expect(page.getByTestId('import-message')).toContainText('Imported');
+
+  // Switch back to Workouts — re-mount reloads state/log/program from IDB.
+  await page.locator('[data-tab="workouts"]').click();
+
+  // The fixture's state.globalDay is 8. After import we should land there.
   await expect(page.getByTestId('day-counter')).toHaveText('8');
 
   // Day 8 in phase 1 maps to schedule index (8 - 1) % 7 = 0 → workout A.
@@ -42,7 +47,8 @@ test('exports a payload matching the legacy schema', async ({ page }) => {
   });
   await page.reload();
 
-  // Seed via the import flow first.
+  // Seed via the import flow first — both buttons live in Settings.
+  await page.locator('[data-tab="settings"]').click();
   await page.getByTestId('import-input').setInputFiles(FIXTURE_PATH);
   await expect(page.getByTestId('import-message')).toContainText('Imported');
 
