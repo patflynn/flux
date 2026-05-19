@@ -227,6 +227,7 @@ export function ExerciseCard({
                   <button
                     key={d}
                     type="button"
+                    aria-pressed={selected}
                     class={
                       'rounded border px-2 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors ' +
                       (selected
@@ -252,7 +253,7 @@ export function ExerciseCard({
                     max={maxSets}
                     value={failedSet}
                     class="mt-1 block w-full"
-                    onInput={(e) =>
+                    onChange={(e) =>
                       onLog(key, {
                         exercise: exercise.name,
                         failedSet: Number((e.target as HTMLInputElement).value),
@@ -270,7 +271,7 @@ export function ExerciseCard({
                     max={maxReps}
                     value={failedRep}
                     class="mt-1 block w-full"
-                    onInput={(e) =>
+                    onChange={(e) =>
                       onLog(key, {
                         exercise: exercise.name,
                         failedRep: Number((e.target as HTMLInputElement).value),
