@@ -105,10 +105,13 @@ test('empty-state CTA rejects a no-program envelope with a helpful message', asy
   await expect(page.getByTestId('no-program')).toBeVisible();
 });
 
-test('toolbar Import Backup label is visible and surfaces guidance for no-program backups', async ({
+test('Settings Import Backup label is visible and surfaces guidance for no-program backups', async ({
   page,
 }) => {
   await resetAndLoad(page);
+
+  // Backup import lives in the Settings tab now.
+  await page.locator('[data-tab="settings"]').click();
 
   await expect(page.getByTestId('import-backup-label')).toContainText(
     'Import Backup',
@@ -122,6 +125,9 @@ test('toolbar Import Backup label is visible and surfaces guidance for no-progra
   await expect(page.getByTestId('import-message')).toContainText(
     'still need to load a program',
   );
+
+  // Switch back to Workouts — re-mount picks up the imported state from IDB.
+  await page.locator('[data-tab="workouts"]').click();
   // State was applied, so day counter reflects the fixture's globalDay.
   await expect(page.getByTestId('day-counter')).toHaveText('8');
   // No program loaded → empty state still visible.

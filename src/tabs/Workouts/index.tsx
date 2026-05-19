@@ -17,11 +17,7 @@ import {
   saveState,
 } from './state';
 import {
-  applyImportFromFile,
   applyProgramImportFromFile,
-  downloadExport,
-  exportPayload,
-  formatImportMessage,
   formatProgramImportMessage,
 } from './logic/exportImport';
 import type { LogEntry, LogMap, Phase, Program, WorkoutState } from './types';
@@ -157,30 +153,6 @@ export function Workouts() {
     const ns: WorkoutState = { globalDay: day, currentPhase: nextPhaseId };
     setState(ns);
     saveState(ns).catch(() => {});
-  }
-
-  async function handleExport() {
-    const payload = await exportPayload();
-    downloadExport(payload);
-  }
-
-  async function handleImport(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-    try {
-      const result = await applyImportFromFile(file, { applyState: true });
-      const [s, l, p] = await Promise.all([loadState(), loadLog(), loadProgram()]);
-      setState(s);
-      setLog(l);
-      setProgram(p);
-      setImportMessage(formatImportMessage(result));
-    } catch (err) {
-      setImportMessage(
-        'Import failed: ' + (err instanceof Error ? err.message : 'unknown error'),
-      );
-    }
   }
 
   async function handleProgramImport(e: Event) {
@@ -357,27 +329,6 @@ export function Workouts() {
           Complete & Advance →
         </button>
         <span class="flex-1" />
-        <button
-          type="button"
-          class="rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
-          onClick={handleExport}
-          data-testid="export-btn"
-        >
-          Export
-        </button>
-        <label
-          class="cursor-pointer rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-text-secondary hover:text-flux-text-primary"
-          data-testid="import-backup-label"
-        >
-          Import Backup
-          <input
-            type="file"
-            accept="application/json,.json"
-            class="hidden"
-            onChange={handleImport}
-            data-testid="import-input"
-          />
-        </label>
         <button
           type="button"
           class="rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-danger hover:opacity-80"
