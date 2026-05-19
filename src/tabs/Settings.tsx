@@ -6,6 +6,7 @@ import {
   exportPayload,
   formatImportMessage,
 } from './Workouts/logic/exportImport';
+import { clearAll } from './Workouts/state';
 
 const MODE_STORAGE_KEY = 'flux_mode';
 type Mode = 'dark' | 'light';
@@ -57,6 +58,12 @@ export function Settings() {
         'Import failed: ' + (err instanceof Error ? err.message : 'unknown error'),
       );
     }
+  }
+
+  async function handleReset() {
+    if (!confirm('Reset all progress? This clears day count, exercise log, and loaded program.')) return;
+    await clearAll();
+    setImportMessage('Reset complete.');
   }
 
   return (
@@ -124,13 +131,36 @@ export function Settings() {
           </label>
         </div>
         {importMessage && (
-          <p
-            class="mt-3 rounded border border-flux-border bg-flux-soft px-3 py-2 text-xs text-flux-text-secondary"
-            data-testid="import-message"
+          <div
+            class="mt-3 flex items-start justify-between gap-2 rounded border border-flux-border bg-flux-soft px-3 py-2 text-xs text-flux-text-secondary"
+            data-testid="backup-import-message"
           >
-            {importMessage}
-          </p>
+            <span class="flex-1">{importMessage}</span>
+            <button
+              type="button"
+              onClick={() => setImportMessage(null)}
+              class="shrink-0 text-flux-text-tertiary hover:text-flux-text-primary"
+              aria-label="Dismiss"
+              data-testid="backup-import-message-dismiss"
+            >
+              ×
+            </button>
+          </div>
         )}
+
+        <div class="mt-4 border-t border-flux-border pt-4">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-flux-danger">
+            Danger zone
+          </p>
+          <button
+            type="button"
+            class="mt-2 rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-danger hover:opacity-80"
+            onClick={handleReset}
+            data-testid="reset-btn"
+          >
+            Reset all progress
+          </button>
+        </div>
       </div>
     </section>
   );
