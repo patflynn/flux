@@ -218,67 +218,71 @@ export function ExerciseCard({
           {completed ? '✓ Done' : 'Done'}
         </button>
 
-        <div class="mt-3 grid grid-cols-4 gap-1">
-          {(['failed', 'easy', 'good', 'hard'] as const).map((d) => {
-            const selected = difficulty === d || (!difficulty && d === 'good');
-            return (
-              <button
-                key={d}
-                type="button"
-                class={
-                  'rounded border px-2 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors ' +
-                  (selected
-                    ? 'border-flux-accent bg-flux-accent/15 text-flux-accent'
-                    : 'border-flux-border bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
-                }
-                onClick={() => setDifficulty(d)}
-                data-testid={`difficulty-${index}-${d}`}
-              >
-                {d.toUpperCase()}
-              </button>
-            );
-          })}
-        </div>
+        {completed && (
+          <>
+            <div class="mt-3 grid grid-cols-4 gap-1">
+              {(['failed', 'easy', 'good', 'hard'] as const).map((d) => {
+                const selected = difficulty === d || (!difficulty && d === 'good');
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    class={
+                      'rounded border px-2 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors ' +
+                      (selected
+                        ? 'border-flux-accent bg-flux-accent/15 text-flux-accent'
+                        : 'border-flux-border bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
+                    }
+                    onClick={() => setDifficulty(d)}
+                    data-testid={`difficulty-${index}-${d}`}
+                  >
+                    {d.toUpperCase()}
+                  </button>
+                );
+              })}
+            </div>
 
-        {difficulty === 'failed' && (
-          <div class="mt-3 space-y-2 rounded border border-flux-border bg-flux-soft p-2">
-            <label class="block text-[11px] uppercase tracking-wider text-flux-text-tertiary">
-              Failed on set: <span class="text-flux-text-primary">{failedSet}</span> / {maxSets}
-              <input
-                type="range"
-                min={1}
-                max={maxSets}
-                value={failedSet}
-                class="mt-1 block w-full"
-                onInput={(e) =>
-                  onLog(key, {
-                    exercise: exercise.name,
-                    failedSet: Number((e.target as HTMLInputElement).value),
-                    day: globalDay,
-                    timestamp: Date.now(),
-                  })
-                }
-              />
-            </label>
-            <label class="block text-[11px] uppercase tracking-wider text-flux-text-tertiary">
-              Failed on rep: <span class="text-flux-text-primary">{failedRep}</span> / {maxReps}
-              <input
-                type="range"
-                min={1}
-                max={maxReps}
-                value={failedRep}
-                class="mt-1 block w-full"
-                onInput={(e) =>
-                  onLog(key, {
-                    exercise: exercise.name,
-                    failedRep: Number((e.target as HTMLInputElement).value),
-                    day: globalDay,
-                    timestamp: Date.now(),
-                  })
-                }
-              />
-            </label>
-          </div>
+            {difficulty === 'failed' && (
+              <div class="mt-3 space-y-2 rounded border border-flux-border bg-flux-soft p-2">
+                <label class="block text-[11px] uppercase tracking-wider text-flux-text-tertiary">
+                  Failed on set: <span class="text-flux-text-primary">{failedSet}</span> / {maxSets}
+                  <input
+                    type="range"
+                    min={1}
+                    max={maxSets}
+                    value={failedSet}
+                    class="mt-1 block w-full"
+                    onInput={(e) =>
+                      onLog(key, {
+                        exercise: exercise.name,
+                        failedSet: Number((e.target as HTMLInputElement).value),
+                        day: globalDay,
+                        timestamp: Date.now(),
+                      })
+                    }
+                  />
+                </label>
+                <label class="block text-[11px] uppercase tracking-wider text-flux-text-tertiary">
+                  Failed on rep: <span class="text-flux-text-primary">{failedRep}</span> / {maxReps}
+                  <input
+                    type="range"
+                    min={1}
+                    max={maxReps}
+                    value={failedRep}
+                    class="mt-1 block w-full"
+                    onInput={(e) =>
+                      onLog(key, {
+                        exercise: exercise.name,
+                        failedRep: Number((e.target as HTMLInputElement).value),
+                        day: globalDay,
+                        timestamp: Date.now(),
+                      })
+                    }
+                  />
+                </label>
+              </div>
+            )}
+          </>
         )}
 
         <textarea
