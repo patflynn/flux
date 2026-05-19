@@ -58,6 +58,8 @@
         # shell) because androidenv pulls multi-GB unfree SDK components.
         devShells.android =
           let
+            platformVersion = "34";
+            buildToolsVersion = "34.0.0";
             androidPkgs = import nixpkgs {
               inherit system;
               config = {
@@ -66,8 +68,8 @@
               };
             };
             androidComposition = androidPkgs.androidenv.composeAndroidPackages {
-              platformVersions = [ "34" ];
-              buildToolsVersions = [ "34.0.0" ];
+              platformVersions = [ platformVersion ];
+              buildToolsVersions = [ buildToolsVersion ];
               includeNDK = false;
             };
             androidSdk = androidComposition.androidsdk;
@@ -84,7 +86,7 @@
             ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
             # AGP 8.x looks up aapt2; point it at the nix-provided one so gradle
             # doesn't try to download its own copy.
-            GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/34.0.0/aapt2";
+            GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/${buildToolsVersion}/aapt2";
 
             shellHook = ''
               echo "Flux android dev shell"
