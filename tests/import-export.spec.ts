@@ -21,7 +21,7 @@ test('imports a legacy export file and exposes history', async ({ page }) => {
   // Backup import lives on the Settings tab now.
   await page.locator('[data-tab="settings"]').click();
   await page.getByTestId('import-input').setInputFiles(FIXTURE_PATH);
-  await expect(page.getByTestId('import-message')).toContainText('Imported');
+  await expect(page.getByTestId('backup-import-message')).toContainText('Imported');
 
   // Switch back to Workouts — re-mount reloads state/log/program from IDB.
   await page.locator('[data-tab="workouts"]').click();
@@ -50,7 +50,7 @@ test('exports a payload matching the legacy schema', async ({ page }) => {
   // Seed via the import flow first — both buttons live in Settings.
   await page.locator('[data-tab="settings"]').click();
   await page.getByTestId('import-input').setInputFiles(FIXTURE_PATH);
-  await expect(page.getByTestId('import-message')).toContainText('Imported');
+  await expect(page.getByTestId('backup-import-message')).toContainText('Imported');
 
   const downloadPromise = page.waitForEvent('download');
   await page.getByTestId('export-btn').click();

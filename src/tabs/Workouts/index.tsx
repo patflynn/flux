@@ -8,7 +8,6 @@ import {
 import { resolveExercise } from './logic/resolveExercise';
 import {
   DEFAULT_STATE,
-  clearAll,
   deleteLogEntry,
   loadLog,
   loadProgram,
@@ -172,14 +171,6 @@ export function Workouts() {
     }
   }
 
-  async function handleReset() {
-    if (!confirm('Reset all progress? This clears day count, exercise log, and loaded program.')) return;
-    await clearAll();
-    setState({ ...DEFAULT_STATE });
-    setLog({});
-    setProgram(null);
-  }
-
   if (!loaded) {
     return (
       <section class="flex h-full items-center justify-center">
@@ -328,24 +319,24 @@ export function Workouts() {
         >
           Complete & Advance →
         </button>
-        <span class="flex-1" />
-        <button
-          type="button"
-          class="rounded border border-flux-border bg-flux-soft px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-flux-danger hover:opacity-80"
-          onClick={handleReset}
-          data-testid="reset-btn"
-        >
-          Reset
-        </button>
       </div>
 
       {importMessage && (
-        <p
-          class="rounded border border-flux-border bg-flux-card px-3 py-2 text-xs text-flux-text-secondary"
-          data-testid="import-message"
+        <div
+          class="flex items-start justify-between gap-2 rounded border border-flux-border bg-flux-card px-3 py-2 text-xs text-flux-text-secondary"
+          data-testid="program-import-message"
         >
-          {importMessage}
-        </p>
+          <span class="flex-1">{importMessage}</span>
+          <button
+            type="button"
+            onClick={() => setImportMessage(null)}
+            class="shrink-0 text-flux-text-tertiary hover:text-flux-text-primary"
+            aria-label="Dismiss"
+            data-testid="program-import-message-dismiss"
+          >
+            ×
+          </button>
+        </div>
       )}
 
       {video && (

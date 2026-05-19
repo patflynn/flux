@@ -32,7 +32,7 @@ test('empty-state CTA accepts a bare program JSON', async ({ page }) => {
 
   await expect(page.getByTestId('workout-name')).toBeVisible();
   await expect(page.getByTestId('phase-name')).toContainText('Phase 1: Bare');
-  await expect(page.getByTestId('import-message')).toContainText(
+  await expect(page.getByTestId('program-import-message')).toContainText(
     'Program loaded',
   );
 
@@ -95,14 +95,30 @@ test('empty-state CTA rejects a no-program envelope with a helpful message', asy
     .getByTestId('import-program-input')
     .setInputFiles(BACKUP_NO_PROGRAM);
 
-  await expect(page.getByTestId('import-message')).toContainText(
+  await expect(page.getByTestId('program-import-message')).toContainText(
     'No program in this file',
   );
-  await expect(page.getByTestId('import-message')).toContainText(
+  await expect(page.getByTestId('program-import-message')).toContainText(
     'Import Backup button',
   );
   // Empty-state must still be showing — no program was loaded.
   await expect(page.getByTestId('no-program')).toBeVisible();
+});
+
+test('program-import message can be dismissed', async ({ page }) => {
+  await resetAndLoad(page);
+
+  await page
+    .getByTestId('import-program-input')
+    .setInputFiles(BARE_PROGRAM);
+
+  await expect(page.getByTestId('program-import-message')).toContainText(
+    'Program loaded',
+  );
+
+  await page.getByTestId('program-import-message-dismiss').click();
+
+  await expect(page.getByTestId('program-import-message')).toHaveCount(0);
 });
 
 test('Settings Import Backup label is visible and surfaces guidance for no-program backups', async ({
@@ -121,8 +137,8 @@ test('Settings Import Backup label is visible and surfaces guidance for no-progr
 
   // imported > 0 (the fixture has log entries) and programApplied = false →
   // guidance message points the user at the per-tab Import Program File CTA.
-  await expect(page.getByTestId('import-message')).toContainText('Imported');
-  await expect(page.getByTestId('import-message')).toContainText(
+  await expect(page.getByTestId('backup-import-message')).toContainText('Imported');
+  await expect(page.getByTestId('backup-import-message')).toContainText(
     'still need to load a program',
   );
 
