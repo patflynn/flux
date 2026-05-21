@@ -1,0 +1,17 @@
+{
+  "id": "20260521-0656-3aba4c1a",
+  "prompt": "In src/tabs/Workouts/components/ExerciseCard.tsx, the per-exercise notes \u003ctextarea\u003e is currently rendered unconditionally (lines 302-309), so it appears before the user marks the exercise done. The 'easy/good/hard/failed' difficulty toggle (inside the {completed \u0026\u0026 (...)} block at lines 234-300) only appears after the 'Mark Done' button is clicked. Make the notes textarea behave the same way: it should only render once the exercise is marked completed.\n\nSpecifically:\n- Move the \u003ctextarea data-testid={`notes-${index}`} ...\u003e element (currently at lines 302-309) into the existing {completed \u0026\u0026 (\u003c\u003e...\u003c/\u003e)} fragment that already wraps the difficulty grid. Place it after the difficulty grid (and after the 'failed' details block that appears when difficulty === 'failed'), so the order inside the completed block is: difficulty grid -\u003e failed-detail (conditional) -\u003e notes textarea.\n- Keep all existing styles, the mt-4 spacing on the textarea, and the setNotes wiring exactly as they are.\n- Do not change setNotes, toggleDone, the state shape, or any other behavior. Notes that were previously saved should still display in the textarea when the exercise is marked completed again later (the current 'value={notes}' wiring already handles this).\n\nAcceptance criteria:\n- Before clicking 'Mark Done': only the done button is visible below the weight controls (no difficulty buttons, no notes textarea).\n- After clicking 'Mark Done': difficulty buttons appear, and the notes textarea appears below them.\n- Toggling done off hides both the difficulty buttons and the notes textarea again.\n- Run the existing test suite (npm test or whatever the project uses — check package.json scripts) and Playwright e2e if practical; fix anything that breaks.\n- Run 'npm run build' to confirm the TypeScript build still passes.\n\nOpen a PR with a short summary of the UX change.",
+  "issue": null,
+  "branch": "agent/20260521-0656-3aba4c1a",
+  "worktree": "/tmp/klaus-sessions/flux/20260521-0656-3aba4c1a",
+  "tmux_pane": "%74",
+  "budget": "5.00",
+  "log_file": "/home/patrick/.klaus/sessions/session-20260521-0654-68b1dee8/logs/20260521-0656-3aba4c1a.jsonl",
+  "created_at": "2026-05-21T06:56:26-04:00",
+  "cost_usd": 0.7552222500000001,
+  "duration_ms": 140226,
+  "pr_url": "https://github.com/gunk-dev/flux/pull/82",
+  "target_repo": "flux",
+  "clone_dir": "/home/patrick/hack/flux",
+  "session_name": "20260521-0656-3aba4c1a"
+}
