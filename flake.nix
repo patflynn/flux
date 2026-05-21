@@ -27,6 +27,7 @@
           buildInputs = with pkgs; [
             nodejs_20
             nixfmt-rfc-style
+            android-tools
             klaus.packages.${system}.default
           ];
 
@@ -36,6 +37,7 @@
             echo "  npm ci             - Install dependencies"
             echo "  npm run dev        - Vite dev server"
             echo "  npm run build      - Production build to dist/"
+            echo "  adb devices        - list connected Android devices"
           '';
         };
 
