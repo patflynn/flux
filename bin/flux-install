@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Wrapper that invokes scripts/local-install.sh inside the .#android
+# nix dev shell. PATH_add'd via .envrc so this is available as 'flux-install'
+# anywhere inside the flux repo.
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec nix develop "${REPO_ROOT}#android" --command "${REPO_ROOT}/scripts/local-install.sh" "$@"
