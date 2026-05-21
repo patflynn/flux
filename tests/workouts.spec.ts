@@ -58,26 +58,30 @@ test('logs a set and persists it across reload', async ({ page }) => {
   await expect(page.getByTestId('done-3')).toContainText('Done');
 });
 
-test('difficulty toggles hidden until Done is tapped', async ({ page }) => {
+test('difficulty toggles and notes hidden until Done is tapped', async ({ page }) => {
   await resetAndSeedProgram(page);
 
-  // Initially, before any Done tap, none of the four difficulty buttons render.
+  // Initially, before any Done tap, neither the difficulty buttons nor the
+  // notes textarea render.
   await expect(page.getByTestId('difficulty-0-failed')).toHaveCount(0);
   await expect(page.getByTestId('difficulty-0-easy')).toHaveCount(0);
   await expect(page.getByTestId('difficulty-0-good')).toHaveCount(0);
   await expect(page.getByTestId('difficulty-0-hard')).toHaveCount(0);
+  await expect(page.getByTestId('notes-0')).toHaveCount(0);
 
-  // Tap Done — the four difficulty buttons should appear.
+  // Tap Done — the difficulty buttons and notes textarea should appear.
   await page.getByTestId('done-0').click();
   await expect(page.getByTestId('difficulty-0-failed')).toBeVisible();
   await expect(page.getByTestId('difficulty-0-easy')).toBeVisible();
   await expect(page.getByTestId('difficulty-0-good')).toBeVisible();
   await expect(page.getByTestId('difficulty-0-hard')).toBeVisible();
+  await expect(page.getByTestId('notes-0')).toBeVisible();
 
-  // Un-tap Done — the buttons should disappear again.
+  // Un-tap Done — both should disappear again.
   await page.getByTestId('done-0').click();
   await expect(page.getByTestId('difficulty-0-failed')).toHaveCount(0);
   await expect(page.getByTestId('difficulty-0-easy')).toHaveCount(0);
   await expect(page.getByTestId('difficulty-0-good')).toHaveCount(0);
   await expect(page.getByTestId('difficulty-0-hard')).toHaveCount(0);
+  await expect(page.getByTestId('notes-0')).toHaveCount(0);
 });

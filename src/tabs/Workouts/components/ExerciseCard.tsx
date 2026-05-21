@@ -296,17 +296,17 @@ export function ExerciseCard({
                 </label>
               </div>
             )}
+
+            <textarea
+              class="mt-4 block w-full rounded-2xl bg-flux-soft px-4 py-3 text-xs text-flux-text-primary placeholder:text-flux-text-tertiary"
+              rows={2}
+              placeholder="Notes (optional)"
+              value={notes}
+              onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
+              data-testid={`notes-${index}`}
+            />
           </>
         )}
-
-        <textarea
-          class="mt-4 block w-full rounded-2xl bg-flux-soft px-4 py-3 text-xs text-flux-text-primary placeholder:text-flux-text-tertiary"
-          rows={2}
-          placeholder="Notes (optional)"
-          value={notes}
-          onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
-          data-testid={`notes-${index}`}
-        />
       </div>
     </article>
   );
