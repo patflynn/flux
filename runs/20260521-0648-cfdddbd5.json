@@ -1,0 +1,19 @@
+{
+  "id": "20260521-0648-cfdddbd5",
+  "prompt": "Extend PR 80 with direnv support so that `cd`'ing into the flux repo auto-activates the default dev shell and exposes `flux-install` (the script being added in this PR) on PATH — no `nix develop .#android --command ...` typing needed.\n\n**Files to add on this branch (`agent/20260519-1520-7327b58c`):**\n\n1. **`.envrc` at the repo root:**\n   ```\n   use flake\n   PATH_add bin\n   ```\n   - `use flake` activates `devShells.default` via nix-direnv (the same pattern cosmo uses — user's environment already has nix-direnv configured).\n   - `PATH_add bin` puts the repo's `bin/` dir at the front of PATH while inside the repo.\n\n2. **`bin/flux-install` — a thin executable wrapper:**\n   ```bash\n   #!/usr/bin/env bash\n   # Wrapper that invokes scripts/local-install.sh inside the .#android\n   # nix dev shell. PATH_add'd via .envrc so this is available as 'flux-install'\n   # anywhere inside the flux repo.\n   set -euo pipefail\n   REPO_ROOT=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" \u0026\u0026 pwd)\"\n   exec nix develop \"${REPO_ROOT}#android\" --command \"${REPO_ROOT}/scripts/local-install.sh\" \"$@\"\n   ```\n   - Must be `chmod +x` and committed with the executable bit (`git update-index --chmod=+x bin/flux-install` if needed).\n   - The `exec` + absolute paths make it safe to invoke from any subdirectory.\n\n3. **Update `.gitignore`** — add a line for direnv's cache directory near the top:\n   ```\n   .direnv/\n   ```\n   Place it next to `node_modules/` / `dist/` for visual grouping; don't reorder anything else.\n\n4. **Update `README.md`** — in the \"Local Android install\" section that this PR is adding, add a short subsection or paragraph noting the direnv shortcut. Suggested wording:\n\n   \u003e **With direnv:** the repo includes a `.envrc` that auto-loads the default dev shell on `cd`. The first time you enter the directory after pulling this change, run `direnv allow` once. From then on, you can run `flux-install` directly from anywhere inside the repo — it's a wrapper that invokes the android dev shell and runs `scripts/local-install.sh` for you.\n\n**Validation:**\n- `bash -n bin/flux-install` — shell syntax check\n- `nix run nixpkgs#shellcheck -- bin/flux-install` — no new shellcheck errors (warnings OK)\n- `ls -la bin/flux-install` — confirm executable bit\n- Sanity-check the `.envrc` content is exactly two lines and parses (no validation tool needed; it's trivial)\n\n**Out of scope:**\n- Don't add any other aliases / scripts (no `flux-build`, `flux-test`, etc — keep this PR focused on the one install workflow)\n- Don't change `scripts/local-install.sh` itself (it's already in this PR's prior commit)\n- Don't switch the default `.envrc` shell to `.#android` (that would force the multi-GB Android SDK download on anyone who just `cd`'s in for web work; light default is intentional)\n- Don't add direnv to the dev shell's buildInputs (it's a user-level tool, not a project dep)\n\n**Commit message:** \"scripts: add .envrc + bin/flux-install wrapper for direnv users\"\n\n**Update the PR description** to mention the new direnv shortcut in the usage section.\n\nThis is a pure dev-experience addition layered on top of the existing PR. No functional changes.",
+  "issue": null,
+  "pr": "80",
+  "branch": "agent/20260519-1520-7327b58c",
+  "worktree": "/tmp/klaus-sessions/flux/20260521-0648-cfdddbd5",
+  "tmux_pane": "%70",
+  "budget": "5.00",
+  "log_file": "/home/patrick/.klaus/sessions/session-20260518-1703-942d2578/logs/20260521-0648-cfdddbd5.jsonl",
+  "created_at": "2026-05-21T06:49:04-04:00",
+  "cost_usd": 0.5379967500000001,
+  "duration_ms": 76914,
+  "pr_url": "https://github.com/gunk-dev/flux/pull/80",
+  "type": "pr-fix",
+  "target_repo": "flux",
+  "clone_dir": "/home/patrick/hack/flux",
+  "session_name": "20260521-0648-cfdddbd5"
+}
