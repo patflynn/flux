@@ -302,7 +302,7 @@ export function ExerciseCard({
               rows={2}
               placeholder="Notes (optional)"
               value={notes}
-              onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
+              onChange={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
               data-testid={`notes-${index}`}
             />
           </>
