@@ -66,6 +66,12 @@ app (`adb uninstall <appId>`, where `<appId>` is the `appId` from
 data will be wiped, so export a backup first via Settings → Data → Export if
 it matters.
 
+**With direnv:** the repo includes a `.envrc` that auto-loads the default dev
+shell on `cd`. The first time you enter the directory after pulling this
+change, run `direnv allow` once. From then on, you can run `flux-install`
+directly from anywhere inside the repo — it's a wrapper that invokes the
+android dev shell and runs `scripts/local-install.sh` for you.
+
 ## Project layout
 
 ```
