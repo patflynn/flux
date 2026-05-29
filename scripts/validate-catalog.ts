@@ -101,7 +101,7 @@ export function validateExerciseCatalog(
       });
     } else {
       entry.equipmentRequired.forEach((kind, i) => {
-        if (typeof kind !== 'string' || !(kind in equipmentCatalog)) {
+        if (typeof kind !== 'string' || !Object.prototype.hasOwnProperty.call(equipmentCatalog, kind)) {
           findings.push({
             path: `${path}.equipmentRequired[${i}]`,
             message: `exercise "${entry.id}" references unknown equipment kind "${String(kind)}" — not present in EQUIPMENT_CATALOG`,
@@ -126,7 +126,7 @@ export function validateExerciseCatalog(
             return;
           }
           group.forEach((kind, i) => {
-            if (typeof kind !== 'string' || !(kind in equipmentCatalog)) {
+            if (typeof kind !== 'string' || !Object.prototype.hasOwnProperty.call(equipmentCatalog, kind)) {
               findings.push({
                 path: `${path}.equipmentAlternatives[${gi}][${i}]`,
                 message: `exercise "${entry.id}" references unknown equipment kind "${String(kind)}" — not present in EQUIPMENT_CATALOG`,
