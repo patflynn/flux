@@ -21,6 +21,8 @@ export function resolveExercise(entry: WorkoutExercise): ResolvedExercise {
       usesWeight: cat.usesWeight,
       startingWeight: entry.starting_weight ?? cat.defaultStartingWeight,
       weightIncrement: entry.weight_increment ?? cat.defaultWeightIncrement,
+      equipmentRequired: cat.equipmentRequired,
+      equipmentAlternatives: cat.equipmentAlternatives,
     };
   }
   return {

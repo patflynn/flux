@@ -1,3 +1,6 @@
+import type { EquipmentKind } from '../../data/equipmentCatalog';
+import type { LocationsState } from '../../data/inventory';
+
 // Per-workout exercise prescription. References the exercise catalog by id;
 // metadata (name, demo video, technique notes) lives in src/data/exerciseCatalog.ts.
 export interface WorkoutExercise {
@@ -29,6 +32,10 @@ export interface ResolvedExercise {
   usesWeight: boolean;
   startingWeight?: number;
   weightIncrement?: number;
+  // Forwarded from the catalog so callers can run inventory checks without
+  // looking the entry up a second time.
+  equipmentRequired?: EquipmentKind[];
+  equipmentAlternatives?: EquipmentKind[][];
 }
 
 export interface Workout {
@@ -86,4 +93,5 @@ export interface ExportPayload {
   log: LogMap;
   state: Partial<WorkoutState>;
   program?: Program;
+  locations?: LocationsState;
 }

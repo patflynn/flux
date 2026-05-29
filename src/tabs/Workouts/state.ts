@@ -1,15 +1,25 @@
 import { openDb, dbGet, dbPut, dbPutMany, dbDelete, dbClear, dbGetAll } from '../../db/idb';
+import { EQUIPMENT_CATALOG, type EquipmentKind } from '../../data/equipmentCatalog';
+import {
+  cloneDefaultLocationsState,
+  type Inventory,
+  type InventoryItem,
+  type Location,
+  type LocationsState,
+} from '../../data/inventory';
 import type { LogEntry, LogMap, Program, WorkoutState } from './types';
 
 const DB_NAME = 'flux-db';
-// Bumped to 2 to add the 'program' store. New users get it on first open;
+// Bumped to 3 to add the 'inventory' store. New users get it on first open;
 // existing users get an automatic onupgradeneeded migration via openDb.
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STATE_STORE = 'state';
 const LOG_STORE = 'log';
 const PROGRAM_STORE = 'program';
+const INVENTORY_STORE = 'inventory';
 const STATE_KEY = 'current';
 const PROGRAM_KEY = 'current';
+const INVENTORY_KEY = 'current';
 
 const DIFFICULTIES = new Set(['easy', 'good', 'hard', 'failed']);
 
@@ -24,6 +34,7 @@ export function getDb(): Promise<IDBDatabase> {
         { name: STATE_STORE },
         { name: LOG_STORE },
         { name: PROGRAM_STORE },
+        { name: INVENTORY_STORE },
       ],
     });
   }
@@ -95,6 +106,7 @@ export async function clearAll(): Promise<void> {
   await dbClear(db, STATE_STORE);
   await dbClear(db, LOG_STORE);
   await dbClear(db, PROGRAM_STORE);
+  await dbClear(db, INVENTORY_STORE);
 }
 
 export async function loadProgram(): Promise<Program | null> {
@@ -111,6 +123,18 @@ export async function saveProgram(program: Program): Promise<void> {
 export async function clearProgram(): Promise<void> {
   const db = await getDb();
   await dbDelete(db, PROGRAM_STORE, PROGRAM_KEY);
+}
+
+export async function loadLocations(): Promise<LocationsState> {
+  const db = await getDb();
+  const saved = await dbGet<unknown>(db, INVENTORY_STORE, INVENTORY_KEY);
+  if (!saved) return cloneDefaultLocationsState();
+  return sanitizeLocationsState(saved);
+}
+
+export async function saveLocations(state: LocationsState): Promise<void> {
+  const db = await getDb();
+  await dbPut(db, INVENTORY_STORE, state, INVENTORY_KEY);
 }
 
 // Returns the parsed list of all log entries in insertion order. Useful for
@@ -156,6 +180,81 @@ export function sanitizeLogEntry(raw: unknown): Partial<LogEntry> | null {
     out.failedRep = entry.failedRep;
   }
   return out;
+}
+
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+function sanitizeWeights(raw: unknown): number[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<number>();
+  for (const v of raw) {
+    const n = typeof v === 'number' ? v : typeof v === 'string' ? parseFloat(v) : NaN;
+    if (Number.isFinite(n) && n > 0) seen.add(n);
+  }
+  return Array.from(seen).sort((a, b) => a - b);
+}
+
+export function sanitizeInventoryItem(
+  kind: EquipmentKind,
+  raw: unknown,
+): InventoryItem | null {
+  if (!isObject(raw)) return null;
+  const item: InventoryItem = {
+    kind,
+    ownedWeights: sanitizeWeights(raw.ownedWeights),
+  };
+  if (typeof raw.note === 'string' && raw.note.trim().length > 0) {
+    item.note = raw.note.slice(0, 200);
+  }
+  return item;
+}
+
+export function sanitizeInventory(raw: unknown): Inventory {
+  if (!isObject(raw)) return {};
+  const out: Inventory = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (!(key in EQUIPMENT_CATALOG)) continue;
+    const kind = key as EquipmentKind;
+    const item = sanitizeInventoryItem(kind, value);
+    if (item) out[kind] = item;
+  }
+  return out;
+}
+
+function sanitizeLocation(id: string, raw: unknown): Location | null {
+  if (!isObject(raw)) return null;
+  const name =
+    typeof raw.name === 'string' && raw.name.trim().length > 0
+      ? raw.name.slice(0, 80)
+      : id;
+  return {
+    id,
+    name,
+    inventory: sanitizeInventory(raw.inventory),
+  };
+}
+
+export function sanitizeLocationsState(raw: unknown): LocationsState {
+  if (!isObject(raw)) return cloneDefaultLocationsState();
+  const locationsRaw = isObject(raw.locations) ? raw.locations : null;
+  const locations: Record<string, Location> = {};
+  if (locationsRaw) {
+    for (const [id, value] of Object.entries(locationsRaw)) {
+      const loc = sanitizeLocation(id, value);
+      if (loc) locations[id] = loc;
+    }
+  }
+  if (Object.keys(locations).length === 0) {
+    locations.default = { id: 'default', name: 'Home', inventory: {} };
+  }
+  let activeId =
+    typeof raw.activeLocationId === 'string' ? raw.activeLocationId : '';
+  if (!locations[activeId]) {
+    activeId = locations.default ? 'default' : Object.keys(locations)[0];
+  }
+  return { locations, activeLocationId: activeId };
 }
 
 // Reset the cached connection — only used by tests that wipe the DB between runs.
