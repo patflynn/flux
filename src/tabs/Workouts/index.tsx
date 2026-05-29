@@ -14,8 +14,11 @@ import {
   loadProgram,
   loadState,
   putLogEntry,
+  saveProgram,
   saveState,
 } from './state';
+import { useLLM } from '../../llm';
+import { GenerateAIModal } from './components/GenerateAIModal';
 import {
   activeInventory,
   cloneDefaultLocationsState,
@@ -68,6 +71,8 @@ export function Workouts() {
   const [locations, setLocations] = useState<LocationsState>(
     cloneDefaultLocationsState,
   );
+  const [aiOpen, setAiOpen] = useState(false);
+  const llm = useLLM();
 
   useEffect(() => {
     (async () => {
@@ -265,12 +270,21 @@ export function Workouts() {
             </button>
             <button
               type="button"
-              class="cursor-not-allowed rounded-full bg-flux-soft px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-text-tertiary"
-              disabled
+              class={
+                llm.available
+                  ? 'rounded-full bg-flux-accent px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-accent-fg shadow-flux-soft transition-opacity hover:opacity-90'
+                  : 'cursor-not-allowed rounded-full bg-flux-soft px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.15em] text-flux-text-tertiary'
+              }
+              disabled={!llm.available}
+              onClick={() => setAiOpen(true)}
               data-testid="generate-ai-btn"
-              title="AI program generation is on the roadmap."
+              title={
+                llm.available
+                  ? 'Generate a program with the configured LLM.'
+                  : 'Configure an LLM provider in Settings to enable.'
+              }
             >
-              Generate with AI (soon)
+              {llm.available ? 'Generate with AI' : 'Generate with AI (configure in Settings)'}
             </button>
           </div>
           <input
@@ -419,6 +433,23 @@ export function Workouts() {
           videoId={video.videoId}
           start={video.start}
           onClose={() => setVideo(null)}
+        />
+      )}
+
+      {aiOpen && (
+        <GenerateAIModal
+          inventory={inventory}
+          previousProgram={program}
+          onClose={() => setAiOpen(false)}
+          onSaved={async (p) => {
+            setProgram(p);
+            setAiOpen(false);
+            try {
+              await saveProgram(p);
+            } catch {
+              // Surfaces nothing for now — the program is in memory either way.
+            }
+          }}
         />
       )}
     </section>
