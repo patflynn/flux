@@ -2,13 +2,21 @@
 // about every exercise Flux supports. Workout programs (runtime data in
 // IndexedDB) reference catalog entries by id.
 
+import type { EquipmentKind } from './equipmentCatalog';
+
 export interface Exercise {
   id: string;
   name: string;
   // Muscle groups primarily worked. Required; validated by scripts/validate-catalog.ts.
   muscleGroups: string[];
-  // TODO: backfill equipment requirements (e.g., 'kettlebell', 'barbell', 'bodyweight').
-  equipment?: string[];
+  // Equipment required to perform this exercise. AND semantics — the user
+  // needs ALL listed kinds. Use ['bodyweight'] for unequipped exercises.
+  equipmentRequired: EquipmentKind[];
+  // Optional alternative equipment groups. Each inner array is one viable
+  // substitution for equipmentRequired. Example: a kettlebell row could be
+  // performed with a dumbbell, so equipmentAlternatives = [['dumbbell']].
+  // Unused for most entries — reserved for PR-B / PR-C consumption.
+  equipmentAlternatives?: EquipmentKind[][];
   // YouTube video id for a technique demo, if available.
   demoVideoId?: string;
   // Offset in seconds into the demo video where the technique starts.
