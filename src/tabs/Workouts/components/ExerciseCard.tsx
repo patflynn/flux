@@ -10,6 +10,11 @@ interface Props {
   entry: LogEntry | undefined;
   suggestedWeight: number | null;
   lastWeight: number | null;
+  // List of weights the user is allowed to pick for this exercise. null when
+  // the exercise has no weight, or when the user hasn't configured inventory
+  // yet (free-input fallback).
+  allowedWeights?: number[] | null;
+  inventoryConfigured?: boolean;
   onLog: (key: string, partial: Partial<LogEntry>, options?: { remove?: boolean }) => void;
   onPlayVideo: (videoId: string, start?: number) => void;
 }
@@ -21,6 +26,8 @@ export function ExerciseCard({
   entry,
   suggestedWeight,
   lastWeight,
+  allowedWeights = null,
+  inventoryConfigured = false,
   onLog,
   onPlayVideo,
 }: Props) {
@@ -104,6 +111,44 @@ export function ExerciseCard({
 
   const placeholder = suggestedWeight != null ? String(suggestedWeight) : lastWeight != null ? String(lastWeight) : '—';
 
+  const useChipPicker =
+    inventoryConfigured && Array.isArray(allowedWeights) && allowedWeights.length > 0;
+  const inventoryEmptyForExercise =
+    inventoryConfigured && Array.isArray(allowedWeights) && allowedWeights.length === 0;
+  const chipWeights: number[] = useChipPicker ? [...(allowedWeights as number[])] : [];
+  const weightIsDrift =
+    useChipPicker &&
+    typeof weight === 'number' &&
+    !chipWeights.includes(weight);
+  if (weightIsDrift) {
+    chipWeights.push(weight as number);
+    chipWeights.sort((a, b) => a - b);
+  }
+
+  function stepWeight(direction: 1 | -1) {
+    if (useChipPicker) {
+      const opts = allowedWeights as number[];
+      const current = typeof weight === 'number' ? weight : suggestedWeight ?? opts[0];
+      const inList = opts.indexOf(current);
+      if (inList >= 0) {
+        const next = opts[Math.max(0, Math.min(opts.length - 1, inList + direction))];
+        setWeight(next);
+        return;
+      }
+      // Drift case: snap to nearest owned weight in the chosen direction.
+      if (direction === 1) {
+        const next = opts.find((w) => w > current);
+        setWeight(next ?? opts[opts.length - 1]);
+      } else {
+        const next = [...opts].reverse().find((w) => w < current);
+        setWeight(next ?? opts[0]);
+      }
+      return;
+    }
+    const current = weight ?? suggestedWeight ?? MIN_WEIGHT;
+    setWeight(current + direction * increment);
+  }
+
   return (
     <article
       class={
@@ -176,31 +221,74 @@ export function ExerciseCard({
         </div>
       )}
 
-      {exercise.usesWeight && (
-        <div class="mt-4 flex items-center gap-2">
+      {exercise.usesWeight && !inventoryEmptyForExercise && (
+        <div class="mt-4 flex flex-wrap items-center gap-2">
           <span class="text-[10px] font-medium uppercase tracking-[0.18em] text-flux-text-tertiary">
             Weight
           </span>
           <button
             type="button"
             class="flex h-8 w-8 items-center justify-center rounded-full bg-flux-soft text-base text-flux-text-secondary transition-colors hover:text-flux-text-primary"
-            onClick={() => setWeight((weight ?? suggestedWeight ?? MIN_WEIGHT) - increment)}
+            onClick={() => stepWeight(-1)}
             aria-label="Decrease weight"
           >
             −
           </button>
-          <input
-            type="number"
-            class="w-20 rounded-xl bg-flux-soft px-3 py-1.5 text-center text-sm font-medium tabular-nums text-flux-text-primary placeholder:text-flux-text-tertiary"
-            value={weight ?? ''}
-            placeholder={placeholder}
-            onInput={handleWeightInput}
-            data-testid={`weight-${index}`}
-          />
+          {useChipPicker ? (
+            <div
+              class="flex flex-1 flex-nowrap items-center gap-1.5 overflow-x-auto"
+              data-testid={`weight-chips-${index}`}
+            >
+              {chipWeights.map((w) => {
+                const selected = weight === w;
+                const drift = !allowedWeights!.includes(w);
+                return (
+                  <button
+                    key={w}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setWeight(w)}
+                    data-testid={`weight-chip-${index}-${w}`}
+                    data-drift={drift ? 'true' : 'false'}
+                    title={drift ? 'Not in your inventory' : undefined}
+                    class={
+                      'shrink-0 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.15em] transition-colors ' +
+                      (selected
+                        ? drift
+                          ? 'border border-flux-border bg-transparent text-flux-text-primary'
+                          : 'bg-flux-accent text-flux-accent-fg shadow-flux-soft'
+                        : drift
+                          ? 'border border-flux-border bg-transparent text-flux-text-tertiary'
+                          : 'bg-flux-soft text-flux-text-secondary hover:text-flux-text-primary')
+                    }
+                  >
+                    {w}
+                    {drift && (
+                      <span
+                        class="ml-1 inline-block rounded-full bg-flux-soft px-1.5 py-0.5 text-[9px] tracking-[0.12em] text-flux-text-tertiary"
+                        data-testid={`weight-chip-drift-${index}-${w}`}
+                      >
+                        Unmapped
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <input
+              type="number"
+              class="w-20 rounded-xl bg-flux-soft px-3 py-1.5 text-center text-sm font-medium tabular-nums text-flux-text-primary placeholder:text-flux-text-tertiary"
+              value={weight ?? ''}
+              placeholder={placeholder}
+              onChange={handleWeightInput}
+              data-testid={`weight-${index}`}
+            />
+          )}
           <button
             type="button"
             class="flex h-8 w-8 items-center justify-center rounded-full bg-flux-soft text-base text-flux-text-secondary transition-colors hover:text-flux-text-primary"
-            onClick={() => setWeight((weight ?? suggestedWeight ?? MIN_WEIGHT) + increment)}
+            onClick={() => stepWeight(1)}
             aria-label="Increase weight"
           >
             +

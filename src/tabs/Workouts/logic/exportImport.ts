@@ -6,14 +6,18 @@
 
 import { EXERCISE_CATALOG } from '../../../data/exerciseCatalog';
 import {
+  loadLocations,
   loadLog,
   loadProgram,
   loadState,
   putLogEntries,
+  saveLocations,
   saveProgram,
   saveState,
+  sanitizeLocationsState,
   sanitizeLogEntry,
 } from '../state';
+import { isInventoryConfigured } from '../../../data/inventory';
 import type {
   ExportPayload,
   LogEntry,
@@ -26,13 +30,15 @@ import type {
 } from '../types';
 
 export async function exportPayload(): Promise<ExportPayload> {
-  const [log, state, program] = await Promise.all([
+  const [log, state, program, locations] = await Promise.all([
     loadLog(),
     loadState(),
     loadProgram(),
+    loadLocations(),
   ]);
   const payload: ExportPayload = { log, state };
   if (program) payload.program = program;
+  if (isInventoryConfigured(locations)) payload.locations = locations;
   return payload;
 }
 
@@ -58,6 +64,7 @@ export interface ImportResult {
   total: number;
   stateApplied: boolean;
   programApplied: boolean;
+  inventoryApplied: boolean;
   // Populated when a program was imported. Reports how many of its exercises
   // resolved to a catalog entry by id, vs were kept by name as "unmapped".
   exerciseMapping?: {
@@ -72,24 +79,26 @@ export function formatImportMessage(result: ImportResult): string {
   const head =
     `Imported ${result.imported} of ${result.total} ${noun}` +
     (result.skipped ? ` (${result.skipped} skipped)` : '');
+  const inv = result.inventoryApplied ? ' Inventory restored.' : '';
   if (!result.programApplied) {
     // Backup imported but no program inside. Old-app exports don't carry a
     // program — point the user at the per-tab importer.
     if (result.imported > 0) {
       return (
-        `${head}. You still need to load a program — use "Import Program File" on the Workouts tab.`
+        `${head}. You still need to load a program — use "Import Program File" on the Workouts tab.${inv}`
       );
     }
-    return head;
+    return head + inv;
   }
   const m = result.exerciseMapping;
-  if (!m) return `${head}. Program loaded.`;
+  if (!m) return `${head}. Program loaded.${inv}`;
   if (m.unmapped === 0) {
-    return `${head}. Program loaded; ${m.mapped} of ${m.total} exercises map to the Flux catalog.`;
+    return `${head}. Program loaded; ${m.mapped} of ${m.total} exercises map to the Flux catalog.${inv}`;
   }
   return (
     `${head}. Imported. ${m.mapped} of ${m.total} exercises map to the Flux catalog.` +
-    " Unmapped will still log correctly but won't show demos."
+    " Unmapped will still log correctly but won't show demos." +
+    inv
   );
 }
 
@@ -339,12 +348,23 @@ export async function applyImport(
     }
   }
 
+  let inventoryApplied = false;
+  if (data.locations !== undefined) {
+    // Absence means "don't touch existing inventory"; presence means restore
+    // the sanitized payload. Unknown EquipmentKind keys and bad weights get
+    // dropped by sanitizeLocationsState.
+    const sanitized = sanitizeLocationsState(data.locations);
+    await saveLocations(sanitized);
+    inventoryApplied = true;
+  }
+
   return {
     imported,
     skipped,
     total: keys.length,
     stateApplied,
     programApplied,
+    inventoryApplied,
     ...(exerciseMapping ? { exerciseMapping } : {}),
   };
 }

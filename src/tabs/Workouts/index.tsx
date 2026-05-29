@@ -9,12 +9,25 @@ import { resolveExercise } from './logic/resolveExercise';
 import {
   DEFAULT_STATE,
   deleteLogEntry,
+  loadLocations,
   loadLog,
   loadProgram,
   loadState,
   putLogEntry,
   saveState,
 } from './state';
+import {
+  activeInventory,
+  cloneDefaultLocationsState,
+  isInventoryConfigured,
+  type LocationsState,
+} from '../../data/inventory';
+import { EQUIPMENT_CATALOG, type EquipmentKind } from '../../data/equipmentCatalog';
+import {
+  allowedWeightsForExercise,
+  isExerciseSupportedByInventory,
+  missingKindsForExercise,
+} from './logic/equipmentResolve';
 import {
   applyProgramImportFromFile,
   formatProgramImportMessage,
@@ -26,6 +39,15 @@ import { VideoModal } from './components/VideoModal';
 function getCurrentPhase(program: Program | null, state: WorkoutState): Phase | null {
   if (!program) return null;
   return program.phases.find((p) => p.id === state.currentPhase) ?? null;
+}
+
+function formatDriftMessage(missing: EquipmentKind[]): string {
+  const names = missing.map((k) => EQUIPMENT_CATALOG[k]?.name.toLowerCase() ?? k);
+  let list: string;
+  if (names.length === 1) list = names[0];
+  else if (names.length === 2) list = `${names[0]} and ${names[1]}`;
+  else list = `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
+  return `Requires ${list} — not in your inventory.`;
 }
 
 interface VideoState {
@@ -43,13 +65,22 @@ export function Workouts() {
   // generation, persisted to the 'program' store in flux-db. No bundled
   // default — the empty state below covers a fresh install.
   const [program, setProgram] = useState<Program | null>(null);
+  const [locations, setLocations] = useState<LocationsState>(
+    cloneDefaultLocationsState,
+  );
 
   useEffect(() => {
     (async () => {
-      const [s, l, p] = await Promise.all([loadState(), loadLog(), loadProgram()]);
+      const [s, l, p, loc] = await Promise.all([
+        loadState(),
+        loadLog(),
+        loadProgram(),
+        loadLocations(),
+      ]);
       setState(s);
       setLog(l);
       setProgram(p);
+      setLocations(loc);
       setLoaded(true);
     })();
   }, []);
@@ -81,6 +112,12 @@ export function Workouts() {
   // Compute latest-weighted-entry-per-exercise once per log change so render
   // is O(M) instead of O(M*N) (scanning the full log for every exercise).
   const latestWeights = useMemo(() => buildLatestWeightedMap(log), [log]);
+
+  const inventory = useMemo(() => activeInventory(locations), [locations]);
+  const inventoryConfigured = useMemo(
+    () => isInventoryConfigured(locations),
+    [locations],
+  );
 
   const onLog = useCallback(
     (key: string, partial: Partial<LogEntry>, options?: { remove?: boolean }) => {
@@ -277,26 +314,49 @@ export function Workouts() {
             {resolvedExercises.map((ex, i) => {
               const key = `${state.globalDay}_${i}`;
               const last = latestWeights.get(ex.name) ?? null;
+              const hasEquipmentMeta = ex.equipmentRequired !== undefined;
+              const allowedWeights = hasEquipmentMeta
+                ? allowedWeightsForExercise(ex, inventory)
+                : null;
+              const supported = hasEquipmentMeta
+                ? isExerciseSupportedByInventory(ex, inventory)
+                : true;
+              const missing =
+                inventoryConfigured && !supported && hasEquipmentMeta
+                  ? missingKindsForExercise(ex, inventory)
+                  : [];
               const suggested = ex.usesWeight
                 ? suggestWeight(
                     last,
                     ex.startingWeight,
                     ex.weightIncrement ?? 5,
                     state.globalDay,
+                    allowedWeights,
                   )
                 : null;
               return (
-                <ExerciseCard
-                  key={key}
-                  exercise={ex}
-                  index={i}
-                  globalDay={state.globalDay}
-                  entry={log[key]}
-                  suggestedWeight={suggested}
-                  lastWeight={ex.usesWeight ? null : getLastWeight(last)}
-                  onLog={onLog}
-                  onPlayVideo={(videoId, start) => setVideo({ videoId, start })}
-                />
+                <div key={key} class="space-y-2">
+                  {inventoryConfigured && !supported && missing.length > 0 && (
+                    <div
+                      class="rounded-2xl bg-flux-soft px-3 py-2 text-[11px] uppercase tracking-[0.15em] text-flux-text-tertiary"
+                      data-testid={`inventory-drift-${i}`}
+                    >
+                      {formatDriftMessage(missing)}
+                    </div>
+                  )}
+                  <ExerciseCard
+                    exercise={ex}
+                    index={i}
+                    globalDay={state.globalDay}
+                    entry={log[key]}
+                    suggestedWeight={suggested}
+                    lastWeight={ex.usesWeight ? null : getLastWeight(last)}
+                    allowedWeights={allowedWeights}
+                    inventoryConfigured={inventoryConfigured}
+                    onLog={onLog}
+                    onPlayVideo={(videoId, start) => setVideo({ videoId, start })}
+                  />
+                </div>
               );
             })}
           </div>

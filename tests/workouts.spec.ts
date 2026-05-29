@@ -47,7 +47,10 @@ test('logs a set and persists it across reload', async ({ page }) => {
   await resetAndSeedProgram(page);
 
   // Day 1 workout A — exercise index 3 is the first weighted one (KB Gorilla Rows).
+  // Weight input uses onChange (fires on blur) to avoid per-keystroke writes,
+  // so commit the value with Tab before clicking Done.
   await page.getByTestId('weight-3').fill('30');
+  await page.getByTestId('weight-3').press('Tab');
   await page.getByTestId('done-3').click();
 
   await expect(page.getByTestId('done-3')).toContainText('Done');

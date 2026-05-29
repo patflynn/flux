@@ -39,16 +39,31 @@ export function suggestWeight(
   startingWeight: number | undefined,
   increment: number,
   currentDay: number,
+  allowedWeights?: number[] | null,
 ): number {
+  let value: number;
   if (!last || !isValidWeight(last.weight)) {
-    return startingWeight ?? MIN_WEIGHT;
+    value = startingWeight ?? MIN_WEIGHT;
+  } else {
+    const lastWeek = weekFromDay(last.day);
+    const currentWeek = weekFromDay(currentDay);
+    value =
+      currentWeek > lastWeek
+        ? Math.min(last.weight + increment, MAX_WEIGHT)
+        : last.weight;
   }
-  const lastWeek = weekFromDay(last.day);
-  const currentWeek = weekFromDay(currentDay);
-  if (currentWeek > lastWeek) {
-    return Math.min(last.weight + increment, MAX_WEIGHT);
+  if (allowedWeights && allowedWeights.length > 0) {
+    // Snap DOWN to the highest owned weight ≤ value; if every owned weight is
+    // heavier, return the smallest one (don't suggest something the user
+    // doesn't own).
+    let best: number | null = null;
+    for (const w of allowedWeights) {
+      if (w <= value && (best === null || w > best)) best = w;
+    }
+    if (best !== null) return best;
+    return allowedWeights[0];
   }
-  return last.weight;
+  return value;
 }
 
 export function getLastWeight(last: LogEntry | null | undefined): number | null {
