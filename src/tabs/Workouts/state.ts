@@ -215,7 +215,7 @@ export function sanitizeInventory(raw: unknown): Inventory {
   if (!isObject(raw)) return {};
   const out: Inventory = {};
   for (const [key, value] of Object.entries(raw)) {
-    if (!(key in EQUIPMENT_CATALOG)) continue;
+    if (!Object.prototype.hasOwnProperty.call(EQUIPMENT_CATALOG, key)) continue;
     const kind = key as EquipmentKind;
     const item = sanitizeInventoryItem(kind, value);
     if (item) out[kind] = item;

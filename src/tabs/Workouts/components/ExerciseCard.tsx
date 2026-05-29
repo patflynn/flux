@@ -281,7 +281,7 @@ export function ExerciseCard({
               class="w-20 rounded-xl bg-flux-soft px-3 py-1.5 text-center text-sm font-medium tabular-nums text-flux-text-primary placeholder:text-flux-text-tertiary"
               value={weight ?? ''}
               placeholder={placeholder}
-              onInput={handleWeightInput}
+              onChange={handleWeightInput}
               data-testid={`weight-${index}`}
             />
           )}
