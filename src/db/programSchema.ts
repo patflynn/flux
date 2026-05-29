@@ -5,15 +5,21 @@
 
 import type { Program } from '../tabs/Workouts/types';
 import type { ExerciseCatalog } from '../data/types';
+import type { EquipmentKind } from '../data/equipmentCatalog';
 
 export interface Finding {
   path: string;
   message: string;
 }
 
+// User inventory shape — PR-B owns the actual storage; this is just the
+// minimum shape needed for cross-check here.
+export type InventoryView = Partial<Record<EquipmentKind, { ownedWeights: number[] }>>;
+
 export interface ValidationResult {
   ok: boolean;
   errors: Finding[];
+  warnings?: Finding[];
 }
 
 export const REQUIRED_PRINCIPLES = [
@@ -29,11 +35,23 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
+function groupCoveredByInventory(
+  group: EquipmentKind[],
+  ownedKinds: ReadonlySet<EquipmentKind>,
+): boolean {
+  return group.every((k) => k === 'bodyweight' || ownedKinds.has(k));
+}
+
 export function validateProgramSchema(
   p: unknown,
   catalog: ExerciseCatalog,
+  inventory?: InventoryView,
 ): ValidationResult {
   const errors: Finding[] = [];
+  const warnings: Finding[] = [];
+  const ownedKinds: ReadonlySet<EquipmentKind> | null = inventory
+    ? new Set(Object.keys(inventory) as EquipmentKind[])
+    : null;
 
   if (!isObject(p)) {
     return { ok: false, errors: [{ path: '$', message: 'program must be an object' }] };
@@ -52,7 +70,9 @@ export function validateProgramSchema(
 
   if (!Array.isArray(p.phases)) {
     errors.push({ path: 'phases', message: 'must be an array' });
-    return { ok: errors.length === 0, errors };
+    return ownedKinds
+      ? { ok: errors.length === 0, errors, warnings }
+      : { ok: errors.length === 0, errors };
   }
 
   p.phases.forEach((phase, i) => {
@@ -119,6 +139,24 @@ export function validateProgramSchema(
               path: `${exPath}.exercise_id`,
               message: `unknown exercise_id "${ex.exercise_id}" not present in catalog`,
             });
+          } else if (ownedKinds && typeof ex.exercise_id === 'string') {
+            const cat = catalog[ex.exercise_id];
+            if (cat) {
+              const required = cat.equipmentRequired;
+              const alts = cat.equipmentAlternatives ?? [];
+              const supported =
+                groupCoveredByInventory(required, ownedKinds) ||
+                alts.some((g) => groupCoveredByInventory(g, ownedKinds));
+              if (!supported) {
+                const missing = required.filter(
+                  (k) => k !== 'bodyweight' && !ownedKinds.has(k),
+                );
+                warnings.push({
+                  path: exPath,
+                  message: `requires ${missing.join(', ')}; not in inventory`,
+                });
+              }
+            }
           }
           if (typeof ex.sets !== 'number') {
             errors.push({ path: `${exPath}.sets`, message: 'must be a number' });
@@ -131,7 +169,9 @@ export function validateProgramSchema(
     }
   });
 
-  return { ok: errors.length === 0, errors };
+  return ownedKinds
+    ? { ok: errors.length === 0, errors, warnings }
+    : { ok: errors.length === 0, errors };
 }
 
 export function validatePrinciples(p: unknown): ValidationResult {
@@ -213,8 +253,16 @@ export function validatePrinciples(p: unknown): ValidationResult {
 export function validateProgram(
   p: Program,
   catalog: ExerciseCatalog,
+  inventory?: InventoryView,
 ): ValidationResult {
-  const s = validateProgramSchema(p, catalog);
+  const s = validateProgramSchema(p, catalog, inventory);
   const pr = validatePrinciples(p);
-  return { ok: s.ok && pr.ok, errors: [...s.errors, ...pr.errors] };
+  const merged: ValidationResult = {
+    ok: s.ok && pr.ok,
+    errors: [...s.errors, ...pr.errors],
+  };
+  if (s.warnings !== undefined) {
+    merged.warnings = s.warnings;
+  }
+  return merged;
 }
