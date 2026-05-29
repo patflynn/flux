@@ -132,9 +132,9 @@ export function renderPrompt(opts: {
     ? JSON.stringify(opts.previousProgram, null, 2)
     : 'none';
   return opts.template
-    .replace('{{user_request}}', opts.userRequest.trim())
-    .replace('{{filtered_catalog_json}}', catalogJson)
-    .replace('{{previous_program_or_none}}', prev);
+    .replaceAll('{{user_request}}', opts.userRequest.trim())
+    .replaceAll('{{filtered_catalog_json}}', catalogJson)
+    .replaceAll('{{previous_program_or_none}}', prev);
 }
 
 function stripCodeFences(s: string): string {

@@ -446,8 +446,9 @@ export function Workouts() {
             setAiOpen(false);
             try {
               await saveProgram(p);
-            } catch {
-              // Surfaces nothing for now — the program is in memory either way.
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : String(err);
+              setImportMessage(`Failed to save program: ${msg}`);
             }
           }}
         />

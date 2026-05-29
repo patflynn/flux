@@ -102,7 +102,7 @@ export function GenerateAIModal({
               phase.
             </p>
             <textarea
-              class="h-40 w-full resize-y rounded-2xl bg-flux-soft px-3 py-2 text-sm text-flux-text-primary placeholder:text-flux-text-tertiary focus:outline-none"
+              class="h-40 w-full resize-y rounded-2xl bg-flux-soft px-3 py-2 text-sm text-flux-text-primary placeholder:text-flux-text-tertiary"
               placeholder={PLACEHOLDER}
               value={request}
               onInput={(e) => setRequest((e.target as HTMLTextAreaElement).value)}
