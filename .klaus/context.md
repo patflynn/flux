@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Flux is a wellness PWA that ships as a web app and a single Android APK with three launcher aliases (Workouts, Meditate, Check-in). The Workouts surface is implemented in this repo; Meditate and Check-in are placeholder tabs whose primary apps live elsewhere (per `CLAUDE.md`: `vibe` for meditation, `gunk-dev/balance` for check-ins). An optional LLM provider can generate workout programs from the user's equipment inventory.
+Flux is the umbrella app that implements the workouts surface directly, shipping as a web PWA and a single Android APK with three launcher aliases (Workouts, Meditate, Check-in). Meditate and Check-in are placeholder tabs whose primary apps live elsewhere (per `CLAUDE.md`: `vibe` for meditation, `gunk-dev/balance` for check-ins). An optional LLM provider can generate workout programs from the user's equipment inventory.
 
 ## Tech stack
 
@@ -69,7 +69,7 @@ All commands run inside `nix develop` (mandatory per `CLAUDE.md`).
 ## Gotchas
 
 - Two separate Android toolchains: the `.#android` nix shell (local) and `setup-java` + `setup-android` in `.github/workflows/test.yml` (CI). They are intentionally decoupled — changes that work locally may need CI-side updates and vice versa (`README.md`).
-- `adb install -r` fails with a signature mismatch when a CI-built debug APK is already installed (different debug keystore). Recovery is `adb uninstall dev.gunk.flux` followed by re-install, which wipes IndexedDB data; `scripts/local-install.sh` prints this hint on failure. Export via Settings → Data → Export first.
+- `adb install -r` fails with a signature mismatch when a CI-built debug APK is already installed (different debug keystore). Recovery is `adb uninstall <appId>` (where `<appId>` is the `appId` from `capacitor.config.ts`, currently `dev.gunk.flux`) followed by re-install, which wipes IndexedDB data; `scripts/local-install.sh` prints this hint on failure. Export via Settings → Data → Export first.
 - `flake.nix` pins `npmDepsHash` for the production build. After changing `package-lock.json`, refresh it with `prefetch-npm-deps package-lock.json` (note in `flake.nix`).
 - `package.json` `build` runs `tsc -b` before Vite, so type errors break the build (not just `npm run typecheck`).
 - The Workouts IDB schema is at version 3 (`src/tabs/Workouts/state.ts`); bumping it requires adding the new store to the `stores` array passed to `openDb`, since the upgrade path only creates missing stores.
