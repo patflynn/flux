@@ -1,6 +1,7 @@
 import { render } from 'preact';
 import { App } from './App';
 import type { EntryTab } from './App';
+import { configureProvider, type LLMProvider } from './llm';
 import './index.css';
 
 interface AppEntryBridge {
@@ -11,6 +12,10 @@ declare global {
   interface Window {
     __entry?: EntryTab;
     AppEntry?: AppEntryBridge;
+    // Test hook: Playwright e2e tests stub an LLM provider through this so
+    // the program-generation flow can be exercised without a real backend.
+    // Not used by app code. Stable string so tests can rely on the name.
+    flux_test_configureLLM?: (provider: LLMProvider) => void;
   }
 }
 
@@ -37,6 +42,12 @@ function resolveEntry(): EntryTab {
 const root = document.getElementById('app');
 if (!root) {
   throw new Error('#app root element missing');
+}
+
+if (typeof window !== 'undefined') {
+  window.flux_test_configureLLM = (provider: LLMProvider) => {
+    configureProvider(provider);
+  };
 }
 
 render(<App entry={resolveEntry()} />, root);
